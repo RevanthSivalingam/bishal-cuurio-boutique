@@ -66,7 +66,7 @@ npm run dev -- -H 0.0.0.0
 
 1. Push this repo to GitHub.
 2. <https://vercel.com> → **Import Project** → select your repo.
-3. Add env vars (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in Vercel project settings.
+3. Add env vars (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) in Vercel project settings.
 4. Deploy. Done — you'll get a public HTTPS URL usable from any phone.
 
 ## File map
