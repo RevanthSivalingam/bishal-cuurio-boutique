@@ -70,6 +70,22 @@ export async function listSales(
   return (data ?? []) as Sale[];
 }
 
+export async function adjustStock(
+  supabase: SupabaseClient,
+  entries: Array<{
+    product_id: string;
+    mode: "set" | "adjust";
+    value: number;
+    reason?: string | null;
+  }>
+): Promise<number> {
+  const { data, error } = await supabase.rpc("adjust_stock", {
+    p_items: entries,
+  });
+  if (error) throw new Error(error.message);
+  return (data as number) ?? 0;
+}
+
 export async function fetchReportData(supabase: SupabaseClient, from: string, to: string) {
   const { data: sales, error: salesErr } = await supabase
     .from("sales")

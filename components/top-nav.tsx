@@ -11,6 +11,7 @@ import {
   BarChart3,
   Tags,
   Home,
+  Layers,
 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const PUBLIC_NAV = [{ href: "/", label: "Catalog", Icon: Home }];
 const AUTHED_NAV = [
   { href: "/", label: "Catalog", Icon: Home },
   { href: "/inventory", label: "Inventory", Icon: Package },
+  { href: "/stock", label: "Stock", Icon: Layers },
   { href: "/categories", label: "Categories", Icon: Tags },
   { href: "/sales", label: "Sales", Icon: Receipt },
   { href: "/reports", label: "Reports", Icon: BarChart3 },

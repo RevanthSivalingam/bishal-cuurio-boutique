@@ -75,3 +75,23 @@ export type SaleItem = {
   quantity: number;
   line_total: number;
 };
+
+export const stockAdjustmentEntrySchema = z.object({
+  product_id: z.string().uuid(),
+  mode: z.enum(["set", "adjust"]),
+  value: z.coerce.number().int(),
+  reason: z.string().trim().max(120).optional(),
+});
+export type StockAdjustmentEntry = z.infer<typeof stockAdjustmentEntrySchema>;
+
+export type StockAdjustment = {
+  id: string;
+  owner_id: string;
+  product_id: string;
+  old_stock: number;
+  new_stock: number;
+  delta: number;
+  mode: "set" | "adjust";
+  reason: string | null;
+  created_at: string;
+};

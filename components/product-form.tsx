@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Percent, IndianRupee } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -182,6 +183,16 @@ export function ProductForm({ categories, initial }: Props) {
             {margin.pct.toFixed(1)}%
           </Badge>
         </div>
+
+        <DiscountHelper
+          selling={selling}
+          onApply={(next) =>
+            setValue("selling_price", Math.max(0, Math.round(next * 100) / 100), {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+          }
+        />
       </Card>
 
       <Card className="p-4 flex flex-col gap-4">
@@ -244,5 +255,76 @@ export function ProductForm({ categories, initial }: Props) {
         </div>
       </div>
     </form>
+  );
+}
+
+function DiscountHelper({
+  selling,
+  onApply,
+}: {
+  selling: number;
+  onApply: (next: number) => void;
+}) {
+  const [pct, setPct] = useState("");
+  const [amt, setAmt] = useState("");
+
+  const applyPct = () => {
+    const p = Number(pct);
+    if (!p || isNaN(p)) return;
+    onApply(selling * (1 - p / 100));
+    setPct("");
+  };
+  const applyAmt = () => {
+    const a = Number(amt);
+    if (!a || isNaN(a)) return;
+    onApply(selling - a);
+    setAmt("");
+  };
+
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3">
+      <p className="text-xs uppercase tracking-wide text-zinc-500">
+        Quick discount on selling price
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="flex items-center gap-1">
+          <div className="relative flex-1">
+            <Percent className="size-3 absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <Input
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              placeholder="10"
+              value={pct}
+              onChange={(e) => setPct(e.target.value)}
+              className="pl-6"
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyPct())}
+            />
+          </div>
+          <Button type="button" size="sm" variant="outline" onClick={applyPct}>
+            Apply %
+          </Button>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="relative flex-1">
+            <IndianRupee className="size-3 absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <Input
+              type="number"
+              min="0"
+              step="1"
+              placeholder="50"
+              value={amt}
+              onChange={(e) => setAmt(e.target.value)}
+              className="pl-6"
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyAmt())}
+            />
+          </div>
+          <Button type="button" size="sm" variant="outline" onClick={applyAmt}>
+            Apply ₹
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

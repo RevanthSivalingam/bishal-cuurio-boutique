@@ -309,3 +309,105 @@ drop policy if exists "authed manages categories" on categories;
 create policy "authed manages categories" on categories
   for all using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
+
+-- ---------- STOCK ADJUSTMENTS (audit log) ----------
+create table if not exists stock_adjustments (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid references auth.users(id) on delete cascade not null,
+  product_id uuid references products(id) on delete cascade not null,
+  old_stock integer not null,
+  new_stock integer not null check (new_stock >= 0),
+  delta integer generated always as (new_stock - old_stock) stored,
+  mode text not null check (mode in ('set', 'adjust')),
+  reason text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists stock_adjustments_owner_created_idx
+  on stock_adjustments (owner_id, created_at desc);
+create index if not exists stock_adjustments_product_idx
+  on stock_adjustments (product_id);
+
+alter table stock_adjustments enable row level security;
+
+drop policy if exists "owner reads own stock_adjustments" on stock_adjustments;
+create policy "owner reads own stock_adjustments" on stock_adjustments
+  for select using (auth.uid() = owner_id);
+
+drop policy if exists "owner writes own stock_adjustments" on stock_adjustments;
+create policy "owner writes own stock_adjustments" on stock_adjustments
+  for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+
+-- ---------- adjust_stock RPC ----------
+-- Applies a batch of stock adjustments atomically. Each entry:
+--   { product_id, mode: 'set' | 'adjust', value: int, reason?: string }
+-- 'set': new_stock = value
+-- 'adjust': new_stock = current_stock + value  (value may be negative)
+-- Rejects the whole batch if any result would be negative or any product is not owned.
+create or replace function adjust_stock(p_items jsonb) returns integer
+language plpgsql
+security invoker
+as $$
+declare
+  v_owner uuid := auth.uid();
+  v_item jsonb;
+  v_product_id uuid;
+  v_mode text;
+  v_value integer;
+  v_reason text;
+  v_product record;
+  v_new_stock integer;
+  v_count integer := 0;
+begin
+  if v_owner is null then
+    raise exception 'not authenticated';
+  end if;
+  if jsonb_array_length(p_items) = 0 then
+    return 0;
+  end if;
+
+  for v_item in select * from jsonb_array_elements(p_items)
+  loop
+    v_product_id := (v_item->>'product_id')::uuid;
+    v_mode := v_item->>'mode';
+    v_value := (v_item->>'value')::integer;
+    v_reason := v_item->>'reason';
+
+    if v_mode not in ('set', 'adjust') then
+      raise exception 'invalid mode: %', v_mode;
+    end if;
+
+    select * into v_product from products
+      where id = v_product_id and owner_id = v_owner
+      for update;
+    if v_product.id is null then
+      raise exception 'product % not found or not owned', v_product_id;
+    end if;
+
+    if v_mode = 'set' then
+      v_new_stock := v_value;
+    else
+      v_new_stock := v_product.stock + v_value;
+    end if;
+
+    if v_new_stock < 0 then
+      raise exception 'result would be negative for %: % -> %',
+        v_product.name, v_product.stock, v_new_stock;
+    end if;
+
+    -- Skip no-op entries (saves log noise)
+    if v_new_stock = v_product.stock then
+      continue;
+    end if;
+
+    insert into stock_adjustments
+      (owner_id, product_id, old_stock, new_stock, mode, reason)
+      values (v_owner, v_product_id, v_product.stock, v_new_stock, v_mode, v_reason);
+
+    update products set stock = v_new_stock where id = v_product_id;
+    v_count := v_count + 1;
+  end loop;
+
+  return v_count;
+end;
+$$;
