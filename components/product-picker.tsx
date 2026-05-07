@@ -16,6 +16,7 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const excludeKey = excludeIds.join(",");
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -42,7 +43,8 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
       clearTimeout(t);
       controller.abort();
     };
-  }, [query, excludeIds.join(",")]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, excludeKey]);
 
   return (
     <div className="flex flex-col gap-2">
