@@ -289,3 +289,23 @@ begin
   return v_sale;
 end;
 $$;
+
+-- ---------- PUBLIC CATALOG POLICIES (added for catalog feature) ----------
+-- Anyone (including anonymous) can read products and categories.
+-- Writes remain owner-only for products; any authenticated user can manage categories
+-- (categories are a single global list in this app).
+
+drop policy if exists "owner reads own products" on products;
+drop policy if exists "public reads products" on products;
+create policy "public reads products" on products
+  for select using (true);
+
+drop policy if exists "anyone reads categories" on categories;
+drop policy if exists "public reads categories" on categories;
+create policy "public reads categories" on categories
+  for select using (true);
+
+drop policy if exists "authed manages categories" on categories;
+create policy "authed manages categories" on categories
+  for all using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
