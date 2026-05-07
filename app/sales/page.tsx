@@ -23,6 +23,7 @@ export default function SalesListPage() {
     const supabase = createSupabaseBrowserClient();
     const from = new Date(`${date}T00:00:00`).toISOString();
     const to = new Date(`${date}T23:59:59.999`).toISOString();
+    // (filters by sales.occurred_at — may include back-dated offline sales)
     const run = async () => {
       setLoading(true);
       try {
@@ -102,12 +103,17 @@ export default function SalesListPage() {
                 >
                   {s.status === "void"
                     ? "VOID"
-                    : new Date(s.created_at).toLocaleTimeString("en-IN")}
+                    : new Date(s.occurred_at).toLocaleTimeString("en-IN")}
                 </span>
               </div>
-              <div className="flex justify-between text-sm mt-1">
-                <span className="text-zinc-600 truncate">
+              <div className="flex justify-between text-sm mt-1 items-center gap-2">
+                <span className="text-zinc-600 truncate flex items-center gap-2">
                   {s.customer_name ?? "Walk-in"}
+                  {s.channel === "offline" && (
+                    <span className="text-xs px-1.5 rounded bg-amber-100 text-amber-800">
+                      Offline
+                    </span>
+                  )}
                 </span>
                 <span>{formatINR(s.total)}</span>
               </div>

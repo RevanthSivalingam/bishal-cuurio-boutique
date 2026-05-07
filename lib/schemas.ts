@@ -47,6 +47,8 @@ export const createSaleInputSchema = z.object({
   discount_pct: z.coerce.number().min(0).max(100).default(0),
   customer_name: z.string().trim().max(80).optional().or(z.literal("")),
   customer_phone: z.string().trim().max(20).optional().or(z.literal("")),
+  occurred_at: z.string().optional(),
+  channel: z.enum(["online", "offline"]).default("online"),
 });
 export type CreateSaleInput = z.infer<typeof createSaleInputSchema>;
 
@@ -62,6 +64,8 @@ export type Sale = {
   customer_phone: string | null;
   status: "active" | "void";
   created_at: string;
+  occurred_at: string;
+  channel: "online" | "offline";
   voided_at: string | null;
 };
 

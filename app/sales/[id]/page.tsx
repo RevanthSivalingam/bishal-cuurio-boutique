@@ -65,14 +65,21 @@ export default function BillPage() {
         <div>
           <h1 className="text-2xl font-semibold">{sale.bill_number}</h1>
           <p className="text-sm text-zinc-500">
-            {new Date(sale.created_at).toLocaleString("en-IN")}
+            {new Date(sale.occurred_at).toLocaleString("en-IN")}
           </p>
         </div>
-        {sale.status === "void" && (
-          <span className="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">
-            VOID
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {sale.channel === "offline" && (
+            <span className="px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs font-semibold">
+              OFFLINE
+            </span>
+          )}
+          {sale.status === "void" && (
+            <span className="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">
+              VOID
+            </span>
+          )}
+        </div>
       </div>
 
       {(sale.customer_name || sale.customer_phone) && (

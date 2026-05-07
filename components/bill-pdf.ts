@@ -52,10 +52,16 @@ export async function generateBillPdf(
 
   doc.setFontSize(10);
   doc.text(`Bill: ${sale.bill_number}`, left, y);
-  doc.text(new Date(sale.created_at).toLocaleString("en-IN"), right, y, {
+  doc.text(new Date(sale.occurred_at).toLocaleString("en-IN"), right, y, {
     align: "right",
   });
   y += 6;
+  if (sale.channel === "offline") {
+    doc.setFontSize(9);
+    doc.text("Offline sale", left, y);
+    y += 5;
+    doc.setFontSize(10);
+  }
 
   if (sale.customer_name || sale.customer_phone) {
     doc.text(

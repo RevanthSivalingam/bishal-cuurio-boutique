@@ -25,6 +25,8 @@ export async function createSale(supabase: SupabaseClient, input: CreateSaleInpu
     p_discount_pct: input.discount_pct,
     p_customer_name: input.customer_name?.trim() || null,
     p_customer_phone: input.customer_phone?.trim() || null,
+    p_occurred_at: input.occurred_at || null,
+    p_channel: input.channel,
   });
   if (error) throw new Error(error.message);
   return data as Sale;
@@ -61,9 +63,9 @@ export async function listSales(
   let q = supabase
     .from("sales")
     .select("*")
-    .gte("created_at", from)
-    .lte("created_at", to)
-    .order("created_at", { ascending: false });
+    .gte("occurred_at", from)
+    .lte("occurred_at", to)
+    .order("occurred_at", { ascending: false });
   if (status) q = q.eq("status", status);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
@@ -91,8 +93,8 @@ export async function fetchReportData(supabase: SupabaseClient, from: string, to
     .from("sales")
     .select("*")
     .eq("status", "active")
-    .gte("created_at", from)
-    .lte("created_at", to);
+    .gte("occurred_at", from)
+    .lte("occurred_at", to);
   if (salesErr) throw new Error(salesErr.message);
 
   const saleIds = (sales ?? []).map((s) => s.id);

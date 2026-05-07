@@ -17,6 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { formatINR } from "@/lib/money";
 
+const nowLocalDatetime = () => {
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - off * 60 * 1000);
+  return local.toISOString().slice(0, 16);
+};
+
 export default function NewSalePage() {
   const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
@@ -24,6 +31,8 @@ export default function NewSalePage() {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [showCustomer, setShowCustomer] = useState(false);
+  const [channel, setChannel] = useState<"online" | "offline">("online");
+  const [saleDate, setSaleDate] = useState(nowLocalDatetime);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,11 +56,14 @@ export default function NewSalePage() {
 
   const checkout = async () => {
     setError(null);
+    const occurred_at = saleDate ? new Date(saleDate).toISOString() : undefined;
     const parsed = createSaleInputSchema.safeParse({
       items: lines,
       discount_pct: discountPct,
       customer_name: customerName,
       customer_phone: customerPhone,
+      channel,
+      occurred_at,
     });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Invalid cart");
@@ -76,6 +88,52 @@ export default function NewSalePage() {
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
       <h1 className="text-2xl font-semibold">New sale</h1>
+
+      <section className="flex flex-col gap-3 p-4 rounded-xl border border-zinc-200">
+        <div>
+          <label className="text-xs uppercase tracking-wide text-zinc-500">
+            Channel
+          </label>
+          <div className="mt-1 flex rounded-md overflow-hidden border border-zinc-200 w-fit text-sm">
+            <button
+              type="button"
+              onClick={() => setChannel("online")}
+              className={`px-4 py-1 ${
+                channel === "online"
+                  ? "bg-zinc-900 text-white"
+                  : "bg-white text-zinc-700"
+              }`}
+            >
+              Online
+            </button>
+            <button
+              type="button"
+              onClick={() => setChannel("offline")}
+              className={`px-4 py-1 border-l border-zinc-200 ${
+                channel === "offline"
+                  ? "bg-zinc-900 text-white"
+                  : "bg-white text-zinc-700"
+              }`}
+            >
+              Offline
+            </button>
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-wide text-zinc-500">
+            Sale date &amp; time
+          </label>
+          <Input
+            type="datetime-local"
+            value={saleDate}
+            onChange={(e) => setSaleDate(e.target.value)}
+            className="mt-1 w-fit"
+          />
+          <p className="text-xs text-zinc-500 mt-1">
+            Defaults to now. Backdate here for offline sales captured at the end of the day.
+          </p>
+        </div>
+      </section>
 
       <section>
         <h2 className="font-medium mb-2">Add product</h2>
@@ -150,7 +208,9 @@ export default function NewSalePage() {
         onClick={checkout}
         disabled={submitting || lines.length === 0}
       >
-        {submitting ? "Processing..." : `Checkout · ${formatINR(total)}`}
+        {submitting
+          ? "Processing..."
+          : `Checkout${channel === "offline" ? " (offline)" : ""} · ${formatINR(total)}`}
       </Button>
     </div>
   );
