@@ -18,6 +18,7 @@ export default function BillPage() {
   const [sale, setSale] = useState<Sale | null>(null);
   const [items, setItems] = useState<SaleItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -37,11 +38,19 @@ export default function BillPage() {
     // eslint-disable-next-line react-hooks/purity
     Date.now() - new Date(sale.created_at).getTime() < VOID_WINDOW_MS;
 
-  const download = () =>
-    generateBillPdf(sale, items, {
-      shopName: process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique",
-      gstNumber: process.env.NEXT_PUBLIC_GST_NUMBER || null,
-    });
+  const download = async () => {
+    setDownloading(true);
+    try {
+      await generateBillPdf(sale, items, {
+        shopName: process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique",
+        gstNumber: process.env.NEXT_PUBLIC_GST_NUMBER || null,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "PDF failed");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const doVoid = async () => {
     const supabase = createSupabaseBrowserClient();
@@ -112,7 +121,9 @@ export default function BillPage() {
       </section>
 
       <div className="flex gap-2 flex-wrap">
-        <Button onClick={download}>Download PDF</Button>
+        <Button onClick={download} disabled={downloading}>
+          {downloading ? "Generating..." : "Download PDF"}
+        </Button>
         {voidable && <VoidDialog onConfirm={doVoid} />}
       </div>
     </div>
