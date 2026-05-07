@@ -133,7 +133,7 @@ create policy "owner manages own counters" on bill_counters for all using (auth.
 ### New routes
 
 | Route | Purpose |
-|---|---|
+| --- | --- |
 | `/sales` | List bills. Default: today. Date filter + status filter (all/active/void). |
 | `/sales/new` | Multi-line cart, checkout. |
 | `/sales/[id]` | Single bill view. Download PDF. Void button (if within 24h). |
@@ -178,6 +178,7 @@ Cart table collapses to stacked cards on narrow viewports. Reuse existing Tailwi
 **Library:** `jspdf` (~45KB min+gzip).
 
 **Layout (A4 portrait):**
+
 - Header block: shop name from `NEXT_PUBLIC_SHOP_NAME` (large), bill number, date/time.
 - Customer block (if present).
 - Items table: name, qty, unit price, line total.
@@ -196,7 +197,7 @@ Cart table collapses to stacked cards on narrow viewports. Reuse existing Tailwi
 ## Error handling
 
 | Scenario | Behavior |
-|---|---|
+| --- | --- |
 | Insufficient stock at checkout | RPC raises exception; UI shows "Only N left of {product}", cart preserved |
 | Product deleted between add-to-cart and checkout | RPC raises FK exception; UI shows "Product no longer available" |
 | Network failure during checkout | UI shows retry button, cart preserved in local state |
