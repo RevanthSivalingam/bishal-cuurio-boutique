@@ -28,7 +28,9 @@ export function TopNav() {
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
         <Link href="/inventory" className="flex items-center gap-2 font-semibold shrink-0">
           <Package className="size-5" />
-          <span>GiftShop</span>
+          <span className="truncate">
+            {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
+          </span>
         </Link>
         <nav className="flex items-center gap-1">
           {NAV.map(({ href, label, Icon }) => {

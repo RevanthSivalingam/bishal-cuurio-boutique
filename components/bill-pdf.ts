@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import type { Sale, SaleItem } from "@/lib/schemas";
-import { formatINR } from "@/lib/money";
+import { formatINRAscii } from "@/lib/money";
 
 type Options = {
   shopName: string;
@@ -65,25 +65,25 @@ export function generateBillPdf(sale: Sale, items: SaleItem[], opts: Options) {
     }
     doc.text(item.product_name.slice(0, 45), left, y);
     doc.text(String(item.quantity), 120, y, { align: "right" });
-    doc.text(formatINR(item.unit_sell_price), 150, y, { align: "right" });
-    doc.text(formatINR(item.line_total), right, y, { align: "right" });
+    doc.text(formatINRAscii(item.unit_sell_price), 150, y, { align: "right" });
+    doc.text(formatINRAscii(item.line_total), right, y, { align: "right" });
     y += 6;
   }
 
   doc.line(left, y, right, y);
   y += 6;
   doc.text("Subtotal", 150, y, { align: "right" });
-  doc.text(formatINR(sale.subtotal), right, y, { align: "right" });
+  doc.text(formatINRAscii(sale.subtotal), right, y, { align: "right" });
   y += 6;
   if (sale.discount_amount > 0) {
     doc.text(`Discount (${sale.discount_pct}%)`, 150, y, { align: "right" });
-    doc.text(`- ${formatINR(sale.discount_amount)}`, right, y, { align: "right" });
+    doc.text(`- ${formatINRAscii(sale.discount_amount)}`, right, y, { align: "right" });
     y += 6;
   }
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.text("Grand Total", 150, y, { align: "right" });
-  doc.text(formatINR(sale.total), right, y, { align: "right" });
+  doc.text(formatINRAscii(sale.total), right, y, { align: "right" });
   y += 10;
 
   doc.setFont("helvetica", "italic");

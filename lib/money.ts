@@ -5,6 +5,12 @@ export const formatINR = (n: number) =>
     maximumFractionDigits: n % 1 === 0 ? 0 : 2,
   }).format(n);
 
+export const formatINRAscii = (n: number) =>
+  `Rs. ${new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: n % 1 === 0 ? 0 : 2,
+    minimumFractionDigits: n % 1 === 0 ? 0 : 2,
+  }).format(n)}`;
+
 export const calcMargin = (selling: number, bought: number) => {
   const amount = selling - bought;
   const pct = bought === 0 ? 0 : (amount / bought) * 100;
