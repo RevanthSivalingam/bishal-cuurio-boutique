@@ -12,13 +12,13 @@ Add daily sales tracking, multi-item billing with PDF generation, automatic stoc
 
 - Owner records multi-line sales on mobile in under 30 seconds per bill.
 - Product stock updates automatically and atomically on sale and void.
-- Customer receives a PDF bill (download, shareable via WhatsApp/email).
+- Owner can download a PDF bill per sale.
 - Owner can view daily totals and date-range profit reports.
 - All operations respect per-owner RLS — owners cannot see each other's data.
 
 ## Non-goals (YAGNI)
 
-- Tax/GST computation.
+- Tax/GST computation or breakdown (GST number is displayed on bill as static text only — no tax math).
 - Multi-currency support (assumes single currency, ₹).
 - Customer CRM / repeat-buyer tracking (customer name/phone are per-bill free-text).
 - Payment method tracking (cash/UPI/card).
@@ -153,7 +153,7 @@ Add "Sales" and "Reports" items next to existing "Inventory" in [components/top-
 
 ### Bill view (`/sales/[id]`)
 
-- Shop header — shop name from `NEXT_PUBLIC_SHOP_NAME` env var, fallback to "Boutique".
+- Shop header — shop name from `NEXT_PUBLIC_SHOP_NAME` env var (fallback "Boutique"); GST number from `NEXT_PUBLIC_GST_NUMBER` env var shown below shop name if set.
 - Bill number, timestamp, status badge (red if void).
 - Line items table.
 - Totals breakdown.
@@ -179,7 +179,7 @@ Cart table collapses to stacked cards on narrow viewports. Reuse existing Tailwi
 
 **Layout (A4 portrait):**
 
-- Header block: shop name from `NEXT_PUBLIC_SHOP_NAME` (large), bill number, date/time.
+- Header block: shop name from `NEXT_PUBLIC_SHOP_NAME` (large), GST number from `NEXT_PUBLIC_GST_NUMBER` (smaller, below name, omitted if env var unset), bill number, date/time.
 - Customer block (if present).
 - Items table: name, qty, unit price, line total.
 - Totals block: subtotal, discount (if > 0), grand total (bold, large).
