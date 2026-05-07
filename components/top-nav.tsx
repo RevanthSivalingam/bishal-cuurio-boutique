@@ -79,25 +79,25 @@ export function TopNav() {
   return (
     <>
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-zinc-200">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="p-2 -ml-2 rounded-md hover:bg-zinc-100 active:bg-zinc-200"
+            aria-label="Open menu"
+            aria-expanded={open}
+          >
+            <Menu className="size-6" />
+          </button>
           <Link
             href="/"
-            className="flex items-center gap-2 font-semibold shrink-0 min-w-0"
+            className="flex items-center gap-2 font-semibold min-w-0"
           >
             <Package className="size-5 shrink-0" />
             <span className="truncate">
               {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
             </span>
           </Link>
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="p-2 -mr-2 rounded-md hover:bg-zinc-100 active:bg-zinc-200"
-            aria-label="Open menu"
-            aria-expanded={open}
-          >
-            <Menu className="size-6" />
-          </button>
         </div>
       </header>
 
@@ -110,25 +110,25 @@ export function TopNav() {
       )}
 
       <aside
-        className={`fixed top-0 right-0 z-50 h-full w-72 max-w-[85vw] bg-white shadow-xl transition-transform ${
-          open ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-0 left-0 z-50 h-full w-72 max-w-[85vw] bg-white shadow-xl transition-transform ${
+          open ? "translate-x-0" : "-translate-x-full"
         }`}
         role="dialog"
         aria-modal="true"
         aria-hidden={!open}
       >
         <div className="flex items-center justify-between px-4 h-14 border-b border-zinc-200">
-          <span className="font-semibold truncate">
-            {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
-          </span>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="p-2 -mr-2 rounded-md hover:bg-zinc-100"
+            className="p-2 -ml-2 rounded-md hover:bg-zinc-100"
             aria-label="Close menu"
           >
             <X className="size-5" />
           </button>
+          <span className="font-semibold truncate">
+            {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
+          </span>
         </div>
 
         <nav className="flex flex-col p-2">
