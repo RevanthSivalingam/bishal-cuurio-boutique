@@ -12,9 +12,10 @@ import {
   Tags,
   Home,
   Layers,
+  Menu,
+  X,
 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
 
 const PUBLIC_NAV = [{ href: "/", label: "Catalog", Icon: Home }];
 
@@ -31,6 +32,7 @@ export function TopNav() {
   const router = useRouter();
   const pathname = usePathname();
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -47,9 +49,27 @@ export function TopNav() {
     };
   }, []);
 
+  // close drawer on route change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOpen(false);
+  }, [pathname]);
+
+  // lock body scroll while drawer open
+  useEffect(() => {
+    if (open) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [open]);
+
   const signOut = async () => {
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
+    setOpen(false);
     router.replace("/");
     router.refresh();
   };
@@ -57,18 +77,61 @@ export function TopNav() {
   const nav = authed ? AUTHED_NAV : PUBLIC_NAV;
 
   return (
-    <header className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-zinc-200">
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-semibold shrink-0"
-        >
-          <Package className="size-5" />
-          <span className="truncate">
+    <>
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-zinc-200">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-semibold shrink-0 min-w-0"
+          >
+            <Package className="size-5 shrink-0" />
+            <span className="truncate">
+              {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
+            </span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="p-2 -mr-2 rounded-md hover:bg-zinc-100 active:bg-zinc-200"
+            aria-label="Open menu"
+            aria-expanded={open}
+          >
+            <Menu className="size-6" />
+          </button>
+        </div>
+      </header>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`fixed top-0 right-0 z-50 h-full w-72 max-w-[85vw] bg-white shadow-xl transition-transform ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!open}
+      >
+        <div className="flex items-center justify-between px-4 h-14 border-b border-zinc-200">
+          <span className="font-semibold truncate">
             {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
           </span>
-        </Link>
-        <nav className="flex items-center gap-1 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="p-2 -mr-2 rounded-md hover:bg-zinc-100"
+            aria-label="Close menu"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+
+        <nav className="flex flex-col p-2">
           {nav.map(({ href, label, Icon }) => {
             const active =
               pathname === href ||
@@ -77,37 +140,40 @@ export function TopNav() {
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-1 px-2 py-1 text-sm rounded-md shrink-0 ${
-                  active ? "bg-zinc-100 font-medium" : "text-zinc-600"
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm ${
+                  active
+                    ? "bg-zinc-100 font-medium text-zinc-900"
+                    : "text-zinc-700 hover:bg-zinc-50"
                 }`}
               >
-                <Icon className="size-4" />
-                <span className="hidden sm:inline">{label}</span>
+                <Icon className="size-5" />
+                {label}
               </Link>
             );
           })}
         </nav>
-        {authed === null ? (
-          <div className="w-20" />
-        ) : authed ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={signOut}
-            aria-label="Sign out"
-          >
-            <LogOut className="size-4" />
-            <span className="hidden sm:inline">Sign out</span>
-          </Button>
-        ) : (
-          <Link href="/login">
-            <Button variant="ghost" size="sm">
-              <LogIn className="size-4" />
-              <span className="hidden sm:inline">Sign in</span>
-            </Button>
-          </Link>
-        )}
-      </div>
-    </header>
+
+        <div className="border-t border-zinc-200 mt-2 p-2">
+          {authed === null ? null : authed ? (
+            <button
+              type="button"
+              onClick={signOut}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-zinc-700 hover:bg-zinc-50"
+            >
+              <LogOut className="size-5" />
+              Sign out
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-zinc-700 hover:bg-zinc-50"
+            >
+              <LogIn className="size-5" />
+              Sign in
+            </Link>
+          )}
+        </div>
+      </aside>
+    </>
   );
 }
