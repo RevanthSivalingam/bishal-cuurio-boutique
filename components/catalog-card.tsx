@@ -14,14 +14,14 @@ export function CatalogCard({ product, category }: Props) {
   return (
     <Link href={`/product/${product.id}`} className="block">
       <Card className="transition-transform active:scale-[0.98] hover:shadow-md overflow-hidden">
-        <div className="relative aspect-square bg-zinc-100">
+        <div className="relative aspect-square bg-zinc-50 p-2">
           {product.image_url ? (
             <Image
               src={product.image_url}
               alt={product.name}
               fill
               sizes="(max-width: 640px) 50vw, 33vw"
-              className="object-cover"
+              className="object-contain"
             />
           ) : (
             <InitialsAvatar name={product.name} />

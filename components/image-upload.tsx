@@ -59,8 +59,8 @@ export function ImageUpload({ value, onChange }: Props) {
         onChange={handleFile}
       />
       {value ? (
-        <div className="relative aspect-square w-full max-w-[200px] rounded-xl overflow-hidden border border-zinc-200 bg-zinc-100">
-          <Image src={value} alt="Product" fill className="object-cover" sizes="200px" />
+        <div className="relative aspect-square w-full max-w-[200px] rounded-xl overflow-hidden border border-zinc-200 bg-zinc-50 p-2">
+          <Image src={value} alt="Product" fill className="object-contain" sizes="200px" />
           <button
             type="button"
             onClick={() => onChange(null)}
