@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { Search, Package } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { adjustStock } from "@/lib/sales";
 import type { Product, StockAdjustment } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/ui/empty-state";
+import { ProductPicker } from "@/components/product-picker";
 
 type Mode = "set" | "adjust";
 type Row = {
@@ -28,42 +27,24 @@ export default function StockPage() {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
 
-  const load = async () => {
+  const loadLog = async () => {
     const supabase = createSupabaseBrowserClient();
-    const [{ data: prods, error: pErr }, { data: adj, error: aErr }] =
-      await Promise.all([
-        supabase.from("products").select("*").order("name"),
-        supabase
-          .from("stock_adjustments")
-          .select("*, products(name)")
-          .order("created_at", { ascending: false })
-          .limit(50),
-      ]);
-    if (pErr) {
-      setErr(pErr.message);
+    const { data, error } = await supabase
+      .from("stock_adjustments")
+      .select("*, products(name)")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) {
+      setErr(error.message);
       return;
     }
-    if (aErr) {
-      setErr(aErr.message);
-      return;
-    }
-    setRows(
-      ((prods ?? []) as Product[]).map((p) => ({
-        product: p,
-        mode: "set",
-        value: "",
-        reason: "",
-      }))
-    );
     setLog(
-      ((adj ?? []) as Array<StockAdjustment & { products: { name: string } | null }>).map(
-        (r) => ({
-          ...r,
-          product_name: r.products?.name ?? "(deleted)",
-        })
-      )
+      (
+        (data ?? []) as Array<
+          StockAdjustment & { products: { name: string } | null }
+        >
+      ).map((r) => ({ ...r, product_name: r.products?.name ?? "(deleted)" }))
     );
   };
 
@@ -71,7 +52,7 @@ export default function StockPage() {
     let cancelled = false;
     const run = async () => {
       try {
-        await load();
+        await loadLog();
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -82,18 +63,26 @@ export default function StockPage() {
     };
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) => r.product.name.toLowerCase().includes(q));
-  }, [rows, search]);
+  const addProduct = (p: Product) => {
+    setRows((curr) =>
+      curr.some((r) => r.product.id === p.id)
+        ? curr
+        : [...curr, { product: p, mode: "set", value: "", reason: "" }]
+    );
+  };
 
   const update = (id: string, patch: Partial<Row>) =>
     setRows((curr) =>
       curr.map((r) => (r.product.id === id ? { ...r, ...patch } : r))
     );
 
-  const pending = rows.filter((r) => r.value !== "" && !isNaN(Number(r.value)));
+  const remove = (id: string) =>
+    setRows((curr) => curr.filter((r) => r.product.id !== id));
+
+  const selectedIds = rows.map((r) => r.product.id);
+  const pending = rows.filter(
+    (r) => r.value !== "" && !isNaN(Number(r.value))
+  );
 
   const save = async () => {
     setErr(null);
@@ -109,7 +98,8 @@ export default function StockPage() {
       const supabase = createSupabaseBrowserClient();
       const count = await adjustStock(supabase, entries);
       setOk(`${count} product${count === 1 ? "" : "s"} updated.`);
-      await load();
+      setRows([]);
+      await loadLog();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Save failed");
     } finally {
@@ -131,51 +121,33 @@ export default function StockPage() {
       </div>
 
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
-        Per row: <strong>Set to</strong> an absolute count, or{" "}
-        <strong>Adjust by</strong> a delta (e.g. <code>-3</code> for offline
-        sales, <code>+10</code> for restock). Rows with empty inputs are
-        ignored.
+        Search and pick the products you want to update. Use <strong>Set to</strong>{" "}
+        for a fresh count, or <strong>Adjust by</strong> a delta
+        (<code>-3</code> for offline sales, <code>+10</code> for restock).
       </p>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
-        <Input
-          placeholder="Search product..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
+      <section className="flex flex-col gap-2">
+        <label className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          Add product to update
+        </label>
+        <ProductPicker
+          onAdd={addProduct}
+          excludeIds={selectedIds}
+          includeOutOfStock
+          placeholder="Search by name…"
         />
-      </div>
+      </section>
 
       {err && <p className="text-sm text-red-600 dark:text-red-400">{err}</p>}
       {ok && <p className="text-sm text-emerald-700 dark:text-emerald-400">{ok}</p>}
 
-      {loading ? (
-        <ul className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <li key={i}>
-              <Skeleton className="h-28 md:h-20 w-full rounded-xl" />
-            </li>
-          ))}
-        </ul>
-      ) : rows.length === 0 ? (
-        <EmptyState
-          icon={Package}
-          title="No products yet"
-          description="Add products to your inventory before you can reconcile stock."
-          action={
-            <Link href="/inventory/new">
-              <Button variant="brand">Add first product</Button>
-            </Link>
-          }
-        />
-      ) : filtered.length === 0 ? (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-          No products match &quot;{search}&quot;.
+      {rows.length === 0 ? (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
+          No products selected yet. Use the search above to add them.
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {filtered.map((r) => {
+          {rows.map((r) => {
             const preview =
               r.value === "" || isNaN(Number(r.value))
                 ? null
@@ -189,24 +161,34 @@ export default function StockPage() {
                 className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 flex flex-col gap-3"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="font-medium truncate">{r.product.name}</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 tabular-nums shrink-0">
-                    {r.product.stock}
-                    {preview !== null && (
-                      <>
-                        {" → "}
-                        <span
-                          className={
-                            invalid
-                              ? "text-red-600 dark:text-red-400 font-semibold"
-                              : "font-semibold text-zinc-900 dark:text-zinc-50"
-                          }
-                        >
-                          {preview}
-                        </span>
-                      </>
-                    )}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{r.product.name}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 tabular-nums">
+                      {r.product.stock}
+                      {preview !== null && (
+                        <>
+                          {" → "}
+                          <span
+                            className={
+                              invalid
+                                ? "text-red-600 dark:text-red-400 font-semibold"
+                                : "font-semibold text-zinc-900 dark:text-zinc-50"
+                            }
+                          >
+                            {preview}
+                          </span>
+                        </>
+                      )}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => remove(r.product.id)}
+                    className="p-1 text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400"
+                    aria-label={`Remove ${r.product.name}`}
+                  >
+                    <X className="size-4" />
+                  </button>
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
                   <div className="flex rounded-md overflow-hidden border border-zinc-200 dark:border-zinc-800 text-sm w-fit">
@@ -217,7 +199,7 @@ export default function StockPage() {
                       }
                       className={`px-3 py-1.5 ${
                         r.mode === "set"
-                          ? "bg-zinc-900 dark:bg-zinc-100 text-white"
+                          ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
                           : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
                       }`}
                     >
@@ -230,7 +212,7 @@ export default function StockPage() {
                       }
                       className={`px-3 py-1.5 border-l border-zinc-200 dark:border-zinc-800 ${
                         r.mode === "adjust"
-                          ? "bg-zinc-900 dark:bg-zinc-100 text-white"
+                          ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
                           : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
                       }`}
                     >
@@ -304,7 +286,9 @@ export default function StockPage() {
                   {e.delta}
                 </span>
                 {e.reason && (
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">· {e.reason}</span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    · {e.reason}
+                  </span>
                 )}
               </li>
             ))}

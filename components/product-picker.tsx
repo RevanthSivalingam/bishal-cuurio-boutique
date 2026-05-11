@@ -10,9 +10,16 @@ import { formatINR } from "@/lib/money";
 type Props = {
   onAdd: (p: Product) => void;
   excludeIds?: string[];
+  includeOutOfStock?: boolean;
+  placeholder?: string;
 };
 
-export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
+export function ProductPicker({
+  onAdd,
+  excludeIds = [],
+  includeOutOfStock = false,
+  placeholder = "Search product by name…",
+}: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,12 +34,8 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
     const controller = new AbortController();
     const run = async () => {
       setLoading(true);
-      const base = supabase
-        .from("products")
-        .select("*")
-        .gt("stock", 0)
-        .order("name")
-        .limit(20);
+      let base = supabase.from("products").select("*").order("name").limit(20);
+      if (!includeOutOfStock) base = base.gt("stock", 0);
       const { data } = query.trim()
         ? await base.ilike("name", `%${query.trim()}%`)
         : await base;
@@ -49,7 +52,7 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
       controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, open, excludeKey]);
+  }, [query, open, excludeKey, includeOutOfStock]);
 
   useEffect(() => {
     if (!open) return;
@@ -95,7 +98,7 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKey}
-          placeholder="Search product by name…"
+          placeholder={placeholder}
           className="pl-10 pr-8"
           role="combobox"
           aria-expanded={open}
