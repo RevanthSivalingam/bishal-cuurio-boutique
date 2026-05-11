@@ -24,8 +24,12 @@ export function CatalogCard({ product, category }: Props) {
               className="object-cover"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-zinc-300">
-              <ImageOff className="size-10" />
+            <div
+              className="absolute inset-0 flex items-center justify-center text-zinc-300"
+              role="img"
+              aria-label={`${product.name} — no image available`}
+            >
+              <ImageOff className="size-10" aria-hidden="true" />
             </div>
           )}
         </div>

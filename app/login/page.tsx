@@ -26,7 +26,7 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    router.replace("/inventory");
+    router.replace("/");
     router.refresh();
   };
 
@@ -34,8 +34,12 @@ export default function LoginPage() {
     <main className="flex-1 flex items-center justify-center p-4">
       <Card className="w-full max-w-sm p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight">GiftShop</h1>
-          <p className="text-sm text-zinc-500 mt-1">Sign in to manage inventory.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
+          </h1>
+          <p className="text-sm text-zinc-500 mt-1">
+            Sign in to manage your shop.
+          </p>
         </div>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
