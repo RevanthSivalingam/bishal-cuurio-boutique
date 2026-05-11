@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Receipt } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { listSales } from "@/lib/sales";
 import type { Sale } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatINR } from "@/lib/money";
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -55,7 +58,7 @@ export default function SalesListPage() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h1 className="text-2xl font-semibold">Sales</h1>
         <Link href="/sales/new">
-          <Button>+ New sale</Button>
+          <Button variant="brand">+ New sale</Button>
         </Link>
       </div>
 
@@ -78,52 +81,70 @@ export default function SalesListPage() {
       </div>
 
       {err && <p className="text-red-600 text-sm">{err}</p>}
-      {loading && <p className="text-sm text-zinc-500">Loading...</p>}
 
-      <p className="text-sm text-zinc-600">
-        {sales.length} bills · Total (active):{" "}
-        <strong>{formatINR(totalActive)}</strong>
-      </p>
-
-      <ul className="flex flex-col gap-2">
-        {sales.map((s) => (
-          <li key={s.id}>
-            <Link
-              href={`/sales/${s.id}`}
-              className="block border border-zinc-200 rounded-xl p-3 hover:bg-zinc-50"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-medium">{s.bill_number}</span>
-                <span
-                  className={
-                    s.status === "void"
-                      ? "text-red-600 text-xs"
-                      : "text-xs text-zinc-500"
-                  }
-                >
-                  {s.status === "void"
-                    ? "VOID"
-                    : new Date(s.occurred_at).toLocaleTimeString("en-IN")}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm mt-1 items-center gap-2">
-                <span className="text-zinc-600 truncate flex items-center gap-2">
-                  {s.customer_name ?? "Walk-in"}
-                  {s.channel === "offline" && (
-                    <span className="text-xs px-1.5 rounded bg-amber-100 text-amber-800">
-                      Offline
-                    </span>
-                  )}
-                </span>
-                <span>{formatINR(s.total)}</span>
-              </div>
+      {loading ? (
+        <ul className="flex flex-col gap-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <li key={i}>
+              <Skeleton className="h-16 w-full rounded-xl" />
+            </li>
+          ))}
+        </ul>
+      ) : sales.length === 0 ? (
+        <EmptyState
+          icon={Receipt}
+          title="No bills for this date"
+          description="Ready to ring up your first sale of the day?"
+          action={
+            <Link href="/sales/new">
+              <Button variant="brand">+ New sale</Button>
             </Link>
-          </li>
-        ))}
-        {!loading && sales.length === 0 && (
-          <li className="text-sm text-zinc-500">No bills for this date.</li>
-        )}
-      </ul>
+          }
+        />
+      ) : (
+        <>
+          <p className="text-sm text-zinc-600">
+            {sales.length} bills · Total (active):{" "}
+            <strong>{formatINR(totalActive)}</strong>
+          </p>
+          <ul className="flex flex-col gap-2">
+            {sales.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={`/sales/${s.id}`}
+                  className="block border border-zinc-200 rounded-xl p-3 hover:bg-zinc-50"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">{s.bill_number}</span>
+                    <span
+                      className={
+                        s.status === "void"
+                          ? "text-red-600 text-xs"
+                          : "text-xs text-zinc-500"
+                      }
+                    >
+                      {s.status === "void"
+                        ? "VOID"
+                        : new Date(s.occurred_at).toLocaleTimeString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm mt-1 items-center gap-2">
+                    <span className="text-zinc-600 truncate flex items-center gap-2">
+                      {s.customer_name ?? "Walk-in"}
+                      {s.channel === "offline" && (
+                        <span className="text-xs px-1.5 rounded bg-amber-100 text-amber-800">
+                          Offline
+                        </span>
+                      )}
+                    </span>
+                    <span>{formatINR(s.total)}</span>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

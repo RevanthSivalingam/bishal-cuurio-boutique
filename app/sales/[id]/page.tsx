@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { Printer, Download, Copy } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { fetchSale, voidSale } from "@/lib/sales";
 import type { Sale, SaleItem } from "@/lib/schemas";
 import { generateBillPdf } from "@/components/bill-pdf";
 import { VoidDialog } from "@/components/void-dialog";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatINR } from "@/lib/money";
 
 const VOID_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -30,8 +33,20 @@ export default function BillPage() {
       .catch((e) => setError(e instanceof Error ? e.message : "Load failed"));
   }, [id]);
 
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (!sale) return <p>Loading...</p>;
+  if (error)
+    return (
+      <p className="text-red-600" role="alert">
+        {error}
+      </p>
+    );
+  if (!sale)
+    return (
+      <div className="max-w-2xl mx-auto flex flex-col gap-4">
+        <Skeleton className="h-10 w-40" />
+        <Skeleton className="h-5 w-64" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    );
 
   const voidable =
     sale.status === "active" &&
@@ -44,6 +59,9 @@ export default function BillPage() {
       await generateBillPdf(sale, items, {
         shopName: process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique",
         gstNumber: process.env.NEXT_PUBLIC_GST_NUMBER || null,
+        footerText:
+          process.env.NEXT_PUBLIC_BILL_FOOTER ||
+          "Thank you for shopping with us.",
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : "PDF failed");
@@ -61,14 +79,16 @@ export default function BillPage() {
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">{sale.bill_number}</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="font-mono text-3xl font-bold tracking-tight tabular-nums">
+            {sale.bill_number}
+          </h1>
+          <p className="text-sm text-zinc-500 mt-1">
             {new Date(sale.occurred_at).toLocaleString("en-IN")}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {sale.channel === "offline" && (
             <span className="px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs font-semibold">
               OFFLINE
@@ -83,7 +103,7 @@ export default function BillPage() {
       </div>
 
       {(sale.customer_name || sale.customer_phone) && (
-        <section className="text-sm text-zinc-700">
+        <section className="text-sm text-zinc-700 p-3 rounded-lg bg-zinc-50 border border-zinc-200">
           {sale.customer_name && <p>Customer: {sale.customer_name}</p>}
           {sale.customer_phone && <p>Phone: {sale.customer_phone}</p>}
         </section>
@@ -92,19 +112,23 @@ export default function BillPage() {
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left border-b border-zinc-200">
-            <th className="py-1">Item</th>
-            <th className="py-1 text-right">Qty</th>
-            <th className="py-1 text-right">Price</th>
-            <th className="py-1 text-right">Total</th>
+            <th className="py-2">Item</th>
+            <th className="py-2 text-right">Qty</th>
+            <th className="py-2 text-right">Price</th>
+            <th className="py-2 text-right">Total</th>
           </tr>
         </thead>
         <tbody>
           {items.map((i) => (
             <tr key={i.id} className="border-b border-zinc-100">
-              <td className="py-1">{i.product_name}</td>
-              <td className="py-1 text-right">{i.quantity}</td>
-              <td className="py-1 text-right">{formatINR(i.unit_sell_price)}</td>
-              <td className="py-1 text-right">{formatINR(i.line_total)}</td>
+              <td className="py-2">{i.product_name}</td>
+              <td className="py-2 text-right tabular-nums">{i.quantity}</td>
+              <td className="py-2 text-right tabular-nums">
+                {formatINR(i.unit_sell_price)}
+              </td>
+              <td className="py-2 text-right tabular-nums">
+                {formatINR(i.line_total)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -113,24 +137,42 @@ export default function BillPage() {
       <section className="flex flex-col gap-1 text-sm">
         <div className="flex justify-between">
           <span>Subtotal</span>
-          <span>{formatINR(sale.subtotal)}</span>
+          <span className="tabular-nums">{formatINR(sale.subtotal)}</span>
         </div>
         {sale.discount_amount > 0 && (
           <div className="flex justify-between">
             <span>Discount ({sale.discount_pct}%)</span>
-            <span>- {formatINR(sale.discount_amount)}</span>
+            <span className="tabular-nums">
+              - {formatINR(sale.discount_amount)}
+            </span>
           </div>
         )}
         <div className="flex justify-between text-lg font-semibold border-t border-zinc-200 pt-2">
           <span>Total</span>
-          <span>{formatINR(sale.total)}</span>
+          <span className="tabular-nums">{formatINR(sale.total)}</span>
         </div>
       </section>
 
-      <div className="flex gap-2 flex-wrap">
-        <Button onClick={download} disabled={downloading}>
+      <div className="flex gap-2 flex-wrap no-print">
+        <Button variant="brand" onClick={download} disabled={downloading}>
+          <Download className="size-4" />
           {downloading ? "Generating..." : "Download PDF"}
         </Button>
+        <Button
+          variant="outline"
+          onClick={() => window.print()}
+          aria-label="Print bill"
+        >
+          <Printer className="size-4" />
+          Print
+        </Button>
+        <Link href={`/sales/new?duplicate=${sale.id}`}>
+          <Button variant="outline">
+            <Copy className="size-4" />
+            Duplicate
+          </Button>
+        </Link>
+        <div className="flex-1" />
         {voidable && <VoidDialog onConfirm={doVoid} />}
       </div>
     </div>

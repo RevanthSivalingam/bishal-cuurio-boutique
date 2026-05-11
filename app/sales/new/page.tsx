@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { CartLine, Product } from "@/lib/schemas";
 import { createSaleInputSchema } from "@/lib/schemas";
@@ -10,6 +10,7 @@ import {
   computeSubtotal,
   computeDiscountAmount,
   computeTotal,
+  fetchSale,
 } from "@/lib/sales";
 import { ProductPicker } from "@/components/product-picker";
 import { Cart } from "@/components/cart";
@@ -24,8 +25,18 @@ const nowLocalDatetime = () => {
   return local.toISOString().slice(0, 16);
 };
 
-export default function NewSalePage() {
+export default function NewSalePageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <NewSalePage />
+    </Suspense>
+  );
+}
+
+function NewSalePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const duplicateFrom = searchParams.get("duplicate");
   const [lines, setLines] = useState<CartLine[]>([]);
   const [discountPct, setDiscountPct] = useState(0);
   const [customerName, setCustomerName] = useState("");
@@ -35,6 +46,63 @@ export default function NewSalePage() {
   const [saleDate, setSaleDate] = useState(nowLocalDatetime);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Prefill from an existing bill when /sales/new?duplicate=<id>
+  useEffect(() => {
+    if (!duplicateFrom) return;
+    let cancelled = false;
+    const run = async () => {
+      const supabase = createSupabaseBrowserClient();
+      try {
+        const { sale, items } = await fetchSale(supabase, duplicateFrom);
+        if (cancelled) return;
+        const { data: products } = await supabase
+          .from("products")
+          .select("id, stock")
+          .in(
+            "id",
+            items
+              .map((i) => i.product_id)
+              .filter((v): v is string => v !== null)
+          );
+        if (cancelled) return;
+        const stockById = new Map<string, number>(
+          ((products ?? []) as Array<{ id: string; stock: number }>).map((p) => [
+            p.id,
+            p.stock,
+          ])
+        );
+        setLines(
+          items
+            .filter((i) => i.product_id)
+            .map((i) => ({
+              product_id: i.product_id as string,
+              product_name: i.product_name,
+              quantity: i.quantity,
+              unit_sell_price: i.unit_sell_price,
+              stock_at_add: stockById.get(i.product_id as string) ?? 0,
+            }))
+        );
+        setDiscountPct(sale.discount_pct);
+        if (sale.customer_name || sale.customer_phone) {
+          setCustomerName(sale.customer_name ?? "");
+          setCustomerPhone(sale.customer_phone ?? "");
+          setShowCustomer(true);
+        }
+      } catch (e) {
+        if (!cancelled)
+          setError(
+            e instanceof Error
+              ? `Could not duplicate: ${e.message}`
+              : "Could not duplicate bill"
+          );
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [duplicateFrom]);
 
   const excludeIds = useMemo(() => lines.map((l) => l.product_id), [lines]);
   const subtotal = computeSubtotal(lines);
@@ -53,6 +121,21 @@ export default function NewSalePage() {
       },
     ]);
   };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "n" || e.key === "/") {
+        e.preventDefault();
+        const search = document.querySelector<HTMLInputElement>(
+          'input[role="combobox"]'
+        );
+        search?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const checkout = async () => {
     setError(null);
@@ -77,6 +160,9 @@ export default function NewSalePage() {
     try {
       const supabase = createSupabaseBrowserClient();
       const sale = await createSale(supabase, parsed.data);
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(20);
+      }
       router.push(`/sales/${sale.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Checkout failed");
@@ -87,7 +173,9 @@ export default function NewSalePage() {
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">New sale</h1>
+      <h1 className="text-3xl font-[family-name:var(--font-display)] font-semibold tracking-tight">
+        New sale
+      </h1>
 
       <section className="flex flex-col gap-2 p-4 rounded-xl border border-zinc-200">
         <label className="text-xs uppercase tracking-wide text-zinc-500">
@@ -173,6 +261,7 @@ export default function NewSalePage() {
 
       <Button
         type="button"
+        variant="brand"
         size="lg"
         onClick={checkout}
         disabled={submitting || lines.length === 0}

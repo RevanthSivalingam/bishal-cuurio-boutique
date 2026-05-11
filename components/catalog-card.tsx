@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ImageOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { InitialsAvatar } from "@/components/initials-avatar";
 import { formatINR } from "@/lib/money";
 import type { Product, Category } from "@/lib/schemas";
 
@@ -24,13 +24,7 @@ export function CatalogCard({ product, category }: Props) {
               className="object-cover"
             />
           ) : (
-            <div
-              className="absolute inset-0 flex items-center justify-center text-zinc-300"
-              role="img"
-              aria-label={`${product.name} — no image available`}
-            >
-              <ImageOff className="size-10" aria-hidden="true" />
-            </div>
+            <InitialsAvatar name={product.name} />
           )}
         </div>
         <div className="p-3 flex flex-col gap-1">

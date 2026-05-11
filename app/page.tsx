@@ -21,7 +21,9 @@ export default async function CatalogPage() {
       <TopNav />
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-4">
         <div className="flex flex-col gap-4">
-          <h1 className="text-2xl font-semibold tracking-tight">Catalog</h1>
+          <h1 className="text-3xl md:text-4xl font-[family-name:var(--font-display)] font-semibold tracking-tight">
+            Catalog
+          </h1>
           <CatalogGrid
             products={(products ?? []) as Product[]}
             categories={(categories ?? []) as Category[]}

@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import Link from "next/link";
+import { Search, Package } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { adjustStock } from "@/lib/sales";
 import type { Product, StockAdjustment } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type Mode = "set" | "adjust";
 type Row = {
@@ -119,6 +122,7 @@ export default function StockPage() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h1 className="text-2xl font-semibold">End-of-day stock</h1>
         <Button
+          variant="brand"
           onClick={save}
           disabled={saving || pending.length === 0}
         >
@@ -127,13 +131,14 @@ export default function StockPage() {
       </div>
 
       <p className="text-sm text-zinc-600">
-        Per row: <strong>Set to</strong> an absolute count, or <strong>Adjust by</strong> a delta
-        (e.g. <code>-3</code> for offline sales, <code>+10</code> for restock). Rows with empty
-        inputs are ignored.
+        Per row: <strong>Set to</strong> an absolute count, or{" "}
+        <strong>Adjust by</strong> a delta (e.g. <code>-3</code> for offline
+        sales, <code>+10</code> for restock). Rows with empty inputs are
+        ignored.
       </p>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 pointer-events-none" />
         <Input
           placeholder="Search product..."
           value={search}
@@ -143,120 +148,164 @@ export default function StockPage() {
       </div>
 
       {err && <p className="text-sm text-red-600">{err}</p>}
-      {ok && <p className="text-sm text-green-700">{ok}</p>}
-      {loading && <p className="text-sm text-zinc-500">Loading...</p>}
+      {ok && <p className="text-sm text-emerald-700">{ok}</p>}
 
-      <ul className="flex flex-col gap-2">
-        {filtered.map((r) => {
-          const preview =
-            r.value === "" || isNaN(Number(r.value))
-              ? null
-              : r.mode === "set"
-                ? Number(r.value)
-                : r.product.stock + Number(r.value);
-          const invalid = preview !== null && preview < 0;
-          return (
-            <li
-              key={r.product.id}
-              className="border border-zinc-200 rounded-xl p-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-3"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{r.product.name}</p>
-                <p className="text-xs text-zinc-500">
-                  current: {r.product.stock}
-                  {preview !== null && (
-                    <>
-                      {" → "}
-                      <span className={invalid ? "text-red-600" : "font-medium"}>
-                        {preview}
-                      </span>
-                    </>
-                  )}
-                </p>
-              </div>
-              <div className="flex gap-2 items-center">
-                <div className="flex rounded-md overflow-hidden border border-zinc-200 text-sm">
-                  <button
-                    type="button"
-                    onClick={() => update(r.product.id, { mode: "set", value: "" })}
-                    className={`px-3 py-1 ${
-                      r.mode === "set"
-                        ? "bg-zinc-900 text-white"
-                        : "bg-white text-zinc-700"
-                    }`}
-                  >
-                    Set to
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      update(r.product.id, { mode: "adjust", value: "" })
-                    }
-                    className={`px-3 py-1 border-l border-zinc-200 ${
-                      r.mode === "adjust"
-                        ? "bg-zinc-900 text-white"
-                        : "bg-white text-zinc-700"
-                    }`}
-                  >
-                    Adjust by
-                  </button>
-                </div>
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  placeholder={r.mode === "set" ? "e.g. 15" : "e.g. -3"}
-                  value={r.value}
-                  onChange={(e) =>
-                    update(r.product.id, { value: e.target.value })
-                  }
-                  className="w-28"
-                />
-                <Input
-                  placeholder="Reason (optional)"
-                  value={r.reason}
-                  onChange={(e) =>
-                    update(r.product.id, { reason: e.target.value })
-                  }
-                  className="flex-1 min-w-0"
-                />
-              </div>
+      {loading ? (
+        <ul className="flex flex-col gap-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <li key={i}>
+              <Skeleton className="h-28 md:h-20 w-full rounded-xl" />
             </li>
-          );
-        })}
-        {!loading && filtered.length === 0 && (
-          <li className="text-sm text-zinc-500">No products.</li>
-        )}
-      </ul>
+          ))}
+        </ul>
+      ) : rows.length === 0 ? (
+        <EmptyState
+          icon={Package}
+          title="No products yet"
+          description="Add products to your inventory before you can reconcile stock."
+          action={
+            <Link href="/inventory/new">
+              <Button variant="brand">Add first product</Button>
+            </Link>
+          }
+        />
+      ) : filtered.length === 0 ? (
+        <p className="text-sm text-zinc-500 py-8 text-center">
+          No products match &quot;{search}&quot;.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {filtered.map((r) => {
+            const preview =
+              r.value === "" || isNaN(Number(r.value))
+                ? null
+                : r.mode === "set"
+                  ? Number(r.value)
+                  : r.product.stock + Number(r.value);
+            const invalid = preview !== null && preview < 0;
+            return (
+              <li
+                key={r.product.id}
+                className="border border-zinc-200 rounded-xl p-3 flex flex-col gap-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-medium truncate">{r.product.name}</p>
+                  <p className="text-xs text-zinc-500 tabular-nums shrink-0">
+                    {r.product.stock}
+                    {preview !== null && (
+                      <>
+                        {" → "}
+                        <span
+                          className={
+                            invalid
+                              ? "text-red-600 font-semibold"
+                              : "font-semibold text-zinc-900"
+                          }
+                        >
+                          {preview}
+                        </span>
+                      </>
+                    )}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+                  <div className="flex rounded-md overflow-hidden border border-zinc-200 text-sm w-fit">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update(r.product.id, { mode: "set", value: "" })
+                      }
+                      className={`px-3 py-1.5 ${
+                        r.mode === "set"
+                          ? "bg-zinc-900 text-white"
+                          : "bg-white text-zinc-700"
+                      }`}
+                    >
+                      Set to
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update(r.product.id, { mode: "adjust", value: "" })
+                      }
+                      className={`px-3 py-1.5 border-l border-zinc-200 ${
+                        r.mode === "adjust"
+                          ? "bg-zinc-900 text-white"
+                          : "bg-white text-zinc-700"
+                      }`}
+                    >
+                      Adjust by
+                    </button>
+                  </div>
+                  <Input
+                    type={r.mode === "adjust" ? "text" : "number"}
+                    inputMode="numeric"
+                    pattern={r.mode === "adjust" ? "-?[0-9]*" : "[0-9]*"}
+                    placeholder={r.mode === "set" ? "e.g. 15" : "e.g. -3"}
+                    value={r.value}
+                    onChange={(e) =>
+                      update(r.product.id, { value: e.target.value })
+                    }
+                    className="sm:w-28 tabular-nums"
+                    aria-label={
+                      r.mode === "set"
+                        ? `Set stock for ${r.product.name}`
+                        : `Adjust stock for ${r.product.name}`
+                    }
+                  />
+                  <Input
+                    placeholder="Reason (optional)"
+                    value={r.reason}
+                    onChange={(e) =>
+                      update(r.product.id, { reason: e.target.value })
+                    }
+                    className="flex-1 min-w-0"
+                    aria-label={`Reason for ${r.product.name}`}
+                  />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <section className="mt-4">
         <h2 className="font-medium mb-2">Recent adjustments</h2>
-        {log.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col gap-1.5">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-6" />
+            ))}
+          </div>
+        ) : log.length === 0 ? (
           <p className="text-sm text-zinc-500">No history yet.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {log.map((e) => (
               <li
                 key={e.id}
-                className="border-b border-zinc-100 py-1 flex items-center gap-2 flex-wrap"
+                className="border-b border-zinc-100 py-1.5 flex items-center gap-2 flex-wrap"
               >
                 <span className="text-zinc-500 text-xs w-32 shrink-0">
                   {new Date(e.created_at).toLocaleString("en-IN")}
                 </span>
                 <span className="flex-1 truncate">{e.product_name}</span>
-                <span className="text-zinc-600">
+                <span className="text-zinc-600 tabular-nums">
                   {e.old_stock} → {e.new_stock}
                 </span>
                 <span
-                  className={`px-1.5 rounded ${
+                  className={`px-1.5 rounded tabular-nums ${
                     e.delta >= 0
-                      ? "bg-green-100 text-green-700"
+                      ? "bg-emerald-100 text-emerald-700"
                       : "bg-red-100 text-red-700"
                   } text-xs`}
                 >
                   {e.delta >= 0 ? "+" : ""}
                   {e.delta}
                 </span>
-                {e.reason && <span className="text-xs text-zinc-500">· {e.reason}</span>}
+                {e.reason && (
+                  <span className="text-xs text-zinc-500">· {e.reason}</span>
+                )}
               </li>
             ))}
           </ul>

@@ -5,6 +5,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { fetchReportData, computeProfit } from "@/lib/sales";
 import type { Sale, SaleItem, Product } from "@/lib/schemas";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Sparkline } from "@/components/sparkline";
 import { formatINR } from "@/lib/money";
 
 const startOfMonthISO = () => {
@@ -14,13 +16,29 @@ const startOfMonthISO = () => {
 };
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
+function bucketByDay(sales: Sale[], from: string, to: string): number[] {
+  const start = new Date(`${from}T00:00:00`);
+  const end = new Date(`${to}T00:00:00`);
+  const days = Math.max(
+    1,
+    Math.round((end.getTime() - start.getTime()) / 86400000) + 1
+  );
+  const buckets = new Array(days).fill(0) as number[];
+  for (const s of sales) {
+    const t = new Date(s.occurred_at);
+    const d = Math.floor((t.getTime() - start.getTime()) / 86400000);
+    if (d >= 0 && d < days) buckets[d] += s.total;
+  }
+  return buckets;
+}
+
 export default function ReportsPage() {
   const [from, setFrom] = useState(startOfMonthISO());
   const [to, setTo] = useState(todayISO());
   const [sales, setSales] = useState<Sale[]>([]);
   const [items, setItems] = useState<SaleItem[]>([]);
   const [lowStock, setLowStock] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +70,7 @@ export default function ReportsPage() {
   const totalSales = sales.reduce((s, x) => s + x.total, 0);
   const totalProfit = computeProfit(items);
   const itemsSold = items.reduce((s, x) => s + x.quantity, 0);
+  const daily = useMemo(() => bucketByDay(sales, from, to), [sales, from, to]);
 
   const topProducts = useMemo(() => {
     const map = new Map<string, { name: string; qty: number }>();
@@ -65,8 +84,10 @@ export default function ReportsPage() {
   }, [items]);
 
   return (
-    <div className="max-w-3xl mx-auto flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">Reports</h1>
+    <div className="max-w-3xl mx-auto flex flex-col gap-5">
+      <h1 className="text-3xl font-[family-name:var(--font-display)] font-semibold tracking-tight">
+        Reports
+      </h1>
 
       <div className="flex gap-2 flex-wrap items-center">
         <Input
@@ -75,7 +96,7 @@ export default function ReportsPage() {
           onChange={(e) => setFrom(e.target.value)}
           className="w-auto"
         />
-        <span>to</span>
+        <span className="text-zinc-500 text-sm">to</span>
         <Input
           type="date"
           value={to}
@@ -84,28 +105,60 @@ export default function ReportsPage() {
         />
       </div>
 
-      {loading && <p className="text-sm text-zinc-500">Loading...</p>}
-
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card label="Sales" value={formatINR(totalSales)} />
-        <Card label="Profit" value={formatINR(totalProfit)} />
-        <Card label="Bills" value={String(sales.length)} />
-        <Card label="Items sold" value={String(itemsSold)} />
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-[70px] rounded-xl" />
+            ))
+          : (
+              <>
+                <StatCard label="Sales" value={formatINR(totalSales)} />
+                <StatCard label="Profit" value={formatINR(totalProfit)} emphasis />
+                <StatCard label="Bills" value={String(sales.length)} />
+                <StatCard label="Items sold" value={String(itemsSold)} />
+              </>
+            )}
+      </section>
+
+      <section className="rounded-xl border border-zinc-200 p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-medium">Daily sales</h2>
+          <span className="text-xs text-zinc-500">
+            {daily.length} {daily.length === 1 ? "day" : "days"}
+          </span>
+        </div>
+        {loading ? (
+          <Skeleton className="h-[60px]" />
+        ) : totalSales === 0 ? (
+          <p className="text-sm text-zinc-500 py-4">No sales in range.</p>
+        ) : (
+          <Sparkline
+            values={daily}
+            height={60}
+            aria-label="Daily sales trend for the selected range"
+          />
+        )}
       </section>
 
       <section>
         <h2 className="font-medium mb-2">Top products</h2>
-        {topProducts.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-8" />
+            ))}
+          </div>
+        ) : topProducts.length === 0 ? (
           <p className="text-sm text-zinc-500">No sales in range.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {topProducts.map((p) => (
               <li
                 key={p.name}
-                className="flex justify-between border-b border-zinc-100 py-1"
+                className="flex justify-between border-b border-zinc-100 py-2"
               >
                 <span>{p.name}</span>
-                <span>{p.qty}</span>
+                <span className="tabular-nums">{p.qty}</span>
               </li>
             ))}
           </ul>
@@ -114,17 +167,23 @@ export default function ReportsPage() {
 
       <section>
         <h2 className="font-medium mb-2">Low stock warning</h2>
-        {lowStock.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-8" />
+            ))}
+          </div>
+        ) : lowStock.length === 0 ? (
           <p className="text-sm text-zinc-500">All products above threshold.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {lowStock.map((p) => (
               <li
                 key={p.id}
-                className="flex justify-between border-b border-zinc-100 py-1"
+                className="flex justify-between border-b border-zinc-100 py-2"
               >
                 <span>{p.name}</span>
-                <span className="text-red-600">
+                <span className="text-red-600 tabular-nums">
                   stock {p.stock} / threshold {p.low_stock_threshold}
                 </span>
               </li>
@@ -136,11 +195,31 @@ export default function ReportsPage() {
   );
 }
 
-function Card({ label, value }: { label: string; value: string }) {
+function StatCard({
+  label,
+  value,
+  emphasis = false,
+}: {
+  label: string;
+  value: string;
+  emphasis?: boolean;
+}) {
   return (
-    <div className="border border-zinc-200 rounded-xl p-3">
-      <p className="text-xs text-zinc-500">{label}</p>
-      <p className="font-semibold text-lg">{value}</p>
+    <div
+      className={`border rounded-xl p-3 ${
+        emphasis
+          ? "border-emerald-200 bg-emerald-50"
+          : "border-zinc-200 bg-white"
+      }`}
+    >
+      <p className="text-xs text-zinc-500 uppercase tracking-wide">{label}</p>
+      <p
+        className={`font-semibold text-lg tabular-nums ${
+          emphasis ? "text-emerald-800" : ""
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }

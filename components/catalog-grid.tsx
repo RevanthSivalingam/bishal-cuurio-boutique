@@ -20,6 +20,15 @@ export function CatalogGrid({ products, categories }: Props) {
     [categories]
   );
 
+  const countsByCategory = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of products) {
+      if (!p.category_id) continue;
+      m.set(p.category_id, (m.get(p.category_id) ?? 0) + 1);
+    }
+    return m;
+  }, [products]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return products.filter((p) => {
@@ -33,7 +42,7 @@ export function CatalogGrid({ products, categories }: Props) {
     return (
       <div className="flex flex-col items-center justify-center text-center py-16 gap-4">
         <div className="size-16 rounded-full bg-zinc-100 flex items-center justify-center">
-          <Package className="size-8 text-zinc-400" />
+          <Package className="size-8 text-zinc-400" aria-hidden="true" />
         </div>
         <h2 className="font-medium text-lg">Catalog coming soon</h2>
         <p className="text-sm text-zinc-500 mt-1">
@@ -46,29 +55,34 @@ export function CatalogGrid({ products, categories }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 pointer-events-none" />
         <Input
           placeholder="Search products…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
+          aria-label="Search products"
         />
       </div>
 
       <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 scrollbar-none">
         <Chip
-          label="All"
+          label={`All · ${products.length}`}
           active={activeCategory === null}
           onClick={() => setActiveCategory(null)}
         />
-        {categories.map((c) => (
-          <Chip
-            key={c.id}
-            label={c.name}
-            active={activeCategory === c.id}
-            onClick={() => setActiveCategory(c.id)}
-          />
-        ))}
+        {categories.map((c) => {
+          const count = countsByCategory.get(c.id) ?? 0;
+          if (count === 0) return null;
+          return (
+            <Chip
+              key={c.id}
+              label={`${c.name} · ${count}`}
+              active={activeCategory === c.id}
+              onClick={() => setActiveCategory(c.id)}
+            />
+          );
+        })}
       </div>
 
       {filtered.length === 0 ? (
@@ -103,7 +117,7 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 px-3 py-1 rounded-full text-sm border transition-colors ${
+      className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors tabular-nums ${
         active
           ? "bg-zinc-900 text-white border-zinc-900"
           : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
