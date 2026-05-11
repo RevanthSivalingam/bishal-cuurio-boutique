@@ -13,7 +13,7 @@ type Props = {
 
 export function Cart({ lines, onChange }: Props) {
   if (lines.length === 0) {
-    return <p className="text-sm text-zinc-500">Cart is empty. Add products above.</p>;
+    return <p className="text-sm text-zinc-500 dark:text-zinc-400">Cart is empty. Add products above.</p>;
   }
 
   const update = (idx: number, patch: Partial<CartLine>) =>
@@ -27,14 +27,14 @@ export function Cart({ lines, onChange }: Props) {
         return (
           <li
             key={`${l.product_id}-${idx}`}
-            className="border border-zinc-200 rounded-xl p-3 flex flex-col gap-2"
+            className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 flex flex-col gap-2"
           >
             <div className="flex items-start justify-between gap-2">
               <p className="font-medium truncate">{l.product_name}</p>
               <button
                 type="button"
                 onClick={() => remove(idx)}
-                className="text-red-600 p-1"
+                className="text-red-600 dark:text-red-400 p-1"
                 aria-label="Remove line"
               >
                 <Trash2 className="size-4" />
@@ -71,10 +71,10 @@ export function Cart({ lines, onChange }: Props) {
               >
                 <Plus className="size-4" />
               </Button>
-              <span className="text-sm text-zinc-500">of {l.stock_at_add}</span>
+              <span className="text-sm text-zinc-500 dark:text-zinc-400">of {l.stock_at_add}</span>
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm text-zinc-600 shrink-0">Price</label>
+              <label className="text-sm text-zinc-600 dark:text-zinc-400 shrink-0">Price</label>
               <Input
                 type="number"
                 min={0}
@@ -91,7 +91,7 @@ export function Cart({ lines, onChange }: Props) {
               {formatINR(l.unit_sell_price * l.quantity)}
             </p>
             {overStock && (
-              <p className="text-sm text-red-600">Exceeds stock ({l.stock_at_add})</p>
+              <p className="text-sm text-red-600 dark:text-red-400">Exceeds stock ({l.stock_at_add})</p>
             )}
           </li>
         );

@@ -10,9 +10,16 @@ import { formatINR } from "@/lib/money";
 type Props = {
   onAdd: (p: Product) => void;
   excludeIds?: string[];
+  includeOutOfStock?: boolean;
+  placeholder?: string;
 };
 
-export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
+export function ProductPicker({
+  onAdd,
+  excludeIds = [],
+  includeOutOfStock = false,
+  placeholder = "Search product by name…",
+}: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,12 +34,8 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
     const controller = new AbortController();
     const run = async () => {
       setLoading(true);
-      const base = supabase
-        .from("products")
-        .select("*")
-        .gt("stock", 0)
-        .order("name")
-        .limit(20);
+      let base = supabase.from("products").select("*").order("name").limit(20);
+      if (!includeOutOfStock) base = base.gt("stock", 0);
       const { data } = query.trim()
         ? await base.ilike("name", `%${query.trim()}%`)
         : await base;
@@ -49,7 +52,7 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
       controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, open, excludeKey]);
+  }, [query, open, excludeKey, includeOutOfStock]);
 
   useEffect(() => {
     if (!open) return;
@@ -86,7 +89,7 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
   return (
     <div className="relative" ref={wrapRef}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
         <Input
           value={query}
           onChange={(e) => {
@@ -95,7 +98,7 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKey}
-          placeholder="Search product by name…"
+          placeholder={placeholder}
           className="pl-10 pr-8"
           role="combobox"
           aria-expanded={open}
@@ -104,7 +107,7 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-400"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-400 dark:text-zinc-500"
           aria-label="Toggle list"
           tabIndex={-1}
         >
@@ -116,13 +119,13 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
         <ul
           id="product-picker-list"
           role="listbox"
-          className="absolute z-10 mt-1 w-full max-h-72 overflow-y-auto rounded-md border border-zinc-200 bg-white shadow-lg"
+          className="absolute z-10 mt-1 w-full max-h-72 overflow-y-auto rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg"
         >
           {loading && (
-            <li className="px-3 py-2 text-sm text-zinc-500">Loading…</li>
+            <li className="px-3 py-2 text-sm text-zinc-500 dark:text-zinc-400">Loading…</li>
           )}
           {!loading && results.length === 0 && (
-            <li className="px-3 py-2 text-sm text-zinc-500">
+            <li className="px-3 py-2 text-sm text-zinc-500 dark:text-zinc-400">
               No matching in-stock products.
             </li>
           )}
@@ -133,11 +136,11 @@ export function ProductPicker({ onAdd, excludeIds = [] }: Props) {
                 onClick={() => pick(p)}
                 onMouseEnter={() => setHighlight(i)}
                 className={`w-full flex items-center justify-between gap-3 px-3 py-2 text-left text-sm ${
-                  i === highlight ? "bg-zinc-100" : "bg-white"
+                  i === highlight ? "bg-zinc-100 dark:bg-zinc-800" : "bg-white dark:bg-zinc-900"
                 }`}
               >
                 <span className="truncate">{p.name}</span>
-                <span className="text-xs text-zinc-500 shrink-0">
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 shrink-0">
                   {formatINR(p.selling_price)} · {p.stock}
                 </span>
               </button>

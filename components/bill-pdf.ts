@@ -5,6 +5,7 @@ import { formatINR } from "@/lib/money";
 type Options = {
   shopName: string;
   gstNumber: string | null;
+  footerText?: string;
 };
 
 const FONT_URL = "/fonts/NotoSans-Regular.ttf";
@@ -117,7 +118,9 @@ export async function generateBillPdf(
   y += 10;
 
   doc.setFontSize(9);
-  doc.text("Thank you for shopping with us.", 105, y, { align: "center" });
+  doc.text(opts.footerText ?? "Thank you for shopping with us.", 105, y, {
+    align: "center",
+  });
 
   doc.save(`bill-${sale.bill_number}.pdf`);
 }

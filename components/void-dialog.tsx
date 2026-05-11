@@ -38,16 +38,16 @@ export function VoidDialog({ onConfirm, disabled }: Props) {
       </Button>
       {open && (
         <div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black/40 dark:bg-black/60 flex items-center justify-center p-4 z-50"
           role="dialog"
           aria-modal="true"
         >
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full flex flex-col gap-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 max-w-sm w-full flex flex-col gap-4">
             <h2 className="font-semibold text-lg">Void this bill?</h2>
-            <p className="text-sm text-zinc-600">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Stock will be restored. This cannot be undone.
             </p>
-            {err && <p className="text-sm text-red-600">{err}</p>}
+            {err && <p className="text-sm text-red-600 dark:text-red-400">{err}</p>}
             <div className="flex gap-2 justify-end">
               <Button
                 variant="outline"

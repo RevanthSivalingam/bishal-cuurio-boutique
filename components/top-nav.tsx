@@ -78,12 +78,12 @@ export function TopNav() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-zinc-200">
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-zinc-900/90 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center gap-3">
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="p-2 -ml-2 rounded-md hover:bg-zinc-100 active:bg-zinc-200"
+            className="p-2 -ml-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200"
             aria-label="Open menu"
             aria-expanded={open}
           >
@@ -101,27 +101,27 @@ export function TopNav() {
         </div>
       </header>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40"
-          onClick={() => setOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={`fixed inset-0 z-40 bg-black/40 dark:bg-black/60 transition-opacity duration-200 ${
+          open ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      />
 
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-72 max-w-[85vw] bg-white shadow-xl transition-transform ${
+        className={`fixed top-0 left-0 z-50 h-full w-72 max-w-[85vw] bg-white dark:bg-zinc-900 shadow-xl transition-transform duration-200 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
         role="dialog"
         aria-modal="true"
         aria-hidden={!open}
       >
-        <div className="flex items-center justify-between px-4 h-14 border-b border-zinc-200">
+        <div className="flex items-center justify-between px-4 h-14 border-b border-zinc-200 dark:border-zinc-800">
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="p-2 -ml-2 rounded-md hover:bg-zinc-100"
+            className="p-2 -ml-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
             aria-label="Close menu"
           >
             <X className="size-5" />
@@ -142,8 +142,8 @@ export function TopNav() {
                 href={href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm ${
                   active
-                    ? "bg-zinc-100 font-medium text-zinc-900"
-                    : "text-zinc-700 hover:bg-zinc-50"
+                    ? "bg-zinc-100 dark:bg-zinc-800 font-medium text-zinc-900 dark:text-zinc-50"
+                    : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                 }`}
               >
                 <Icon className="size-5" />
@@ -153,12 +153,12 @@ export function TopNav() {
           })}
         </nav>
 
-        <div className="border-t border-zinc-200 mt-2 p-2">
+        <div className="border-t border-zinc-200 dark:border-zinc-800 mt-2 p-2">
           {authed === null ? null : authed ? (
             <button
               type="button"
               onClick={signOut}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-zinc-700 hover:bg-zinc-50"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
             >
               <LogOut className="size-5" />
               Sign out
@@ -166,7 +166,7 @@ export function TopNav() {
           ) : (
             <Link
               href="/login"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-zinc-700 hover:bg-zinc-50"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
             >
               <LogIn className="size-5" />
               Sign in
