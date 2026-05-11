@@ -177,8 +177,8 @@ function NewSalePage() {
         New sale
       </h1>
 
-      <section className="flex flex-col gap-2 p-4 rounded-xl border border-zinc-200">
-        <label className="text-xs uppercase tracking-wide text-zinc-500">
+      <section className="flex flex-col gap-2 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">
+        <label className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
           Sale date &amp; time
         </label>
         <Input
@@ -187,7 +187,7 @@ function NewSalePage() {
           onChange={(e) => setSaleDate(e.target.value)}
           className="w-fit"
         />
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
           Defaults to now. Backdate for sales captured at the end of the day.
         </p>
       </section>
@@ -202,7 +202,7 @@ function NewSalePage() {
         <Cart lines={lines} onChange={setLines} />
       </section>
 
-      <section className="flex flex-col gap-2 p-4 rounded-xl bg-zinc-50 border border-zinc-200">
+      <section className="flex flex-col gap-2 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
         <div className="flex justify-between">
           <span>Subtotal</span>
           <span>{formatINR(subtotal)}</span>
@@ -223,11 +223,11 @@ function NewSalePage() {
             className="w-24 text-right"
           />
         </div>
-        <div className="flex justify-between text-sm text-zinc-600">
+        <div className="flex justify-between text-sm text-zinc-600 dark:text-zinc-400">
           <span>Discount amount</span>
           <span>- {formatINR(discountAmount)}</span>
         </div>
-        <div className="flex justify-between font-semibold text-lg pt-2 border-t border-zinc-200">
+        <div className="flex justify-between font-semibold text-lg pt-2 border-t border-zinc-200 dark:border-zinc-800">
           <span>Total</span>
           <span>{formatINR(total)}</span>
         </div>
@@ -257,7 +257,7 @@ function NewSalePage() {
         )}
       </section>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       <Button
         type="button"

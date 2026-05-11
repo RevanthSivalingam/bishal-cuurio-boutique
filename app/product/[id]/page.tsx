@@ -43,7 +43,7 @@ export default async function ProductDetailPage({
       <TopNav />
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-4">
         <nav aria-label="Breadcrumb" className="mb-4">
-          <ol className="flex items-center gap-1 text-sm text-zinc-500 flex-wrap">
+          <ol className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400 flex-wrap">
             <li>
               <Link
                 href="/"
@@ -55,7 +55,7 @@ export default async function ProductDetailPage({
             {category && (
               <>
                 <li>
-                  <ChevronRight className="size-3.5 text-zinc-400" />
+                  <ChevronRight className="size-3.5 text-zinc-400 dark:text-zinc-500" />
                 </li>
                 <li>
                   <span>{category.name}</span>
@@ -63,11 +63,11 @@ export default async function ProductDetailPage({
               </>
             )}
             <li>
-              <ChevronRight className="size-3.5 text-zinc-400" />
+              <ChevronRight className="size-3.5 text-zinc-400 dark:text-zinc-500" />
             </li>
             <li
               aria-current="page"
-              className="text-zinc-800 font-medium truncate max-w-[40ch]"
+              className="text-zinc-800 dark:text-zinc-100 font-medium truncate max-w-[40ch]"
             >
               {p.name}
             </li>
@@ -75,7 +75,7 @@ export default async function ProductDetailPage({
         </nav>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="relative aspect-square bg-zinc-50 rounded-xl overflow-hidden p-4">
+          <div className="relative aspect-square bg-zinc-50 dark:bg-zinc-800 rounded-xl overflow-hidden p-4">
             {p.image_url ? (
               <Image
                 src={p.image_url}
@@ -92,7 +92,7 @@ export default async function ProductDetailPage({
 
           <div className="flex flex-col gap-4">
             {category && (
-              <p className="text-sm text-zinc-500 uppercase tracking-wide">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
                 {category.name}
               </p>
             )}

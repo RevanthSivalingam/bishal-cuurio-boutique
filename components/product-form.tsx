@@ -121,7 +121,7 @@ export function ProductForm({ categories, initial }: Props) {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">Product name</Label>
           <Input id="name" placeholder="e.g. Ceramic Rose Plate" {...register("name")} />
-          {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+          {errors.name && <p className="text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>}
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -155,7 +155,7 @@ export function ProductForm({ categories, initial }: Props) {
               {...register("bought_price")}
             />
             {errors.bought_price && (
-              <p className="text-sm text-red-600">{errors.bought_price.message}</p>
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.bought_price.message}</p>
             )}
           </div>
           <div className="flex flex-col gap-1.5">
@@ -169,14 +169,14 @@ export function ProductForm({ categories, initial }: Props) {
               {...register("selling_price")}
             />
             {errors.selling_price && (
-              <p className="text-sm text-red-600">{errors.selling_price.message}</p>
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.selling_price.message}</p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-3">
+        <div className="flex items-center justify-between rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 px-4 py-3">
           <div>
-            <p className="text-xs uppercase tracking-wide text-zinc-500">Margin</p>
+            <p className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Margin</p>
             <p className="text-lg font-semibold">{formatINR(margin.amount)}</p>
           </div>
           <Badge variant={margin.amount >= 0 ? "success" : "danger"}>
@@ -207,7 +207,7 @@ export function ProductForm({ categories, initial }: Props) {
               step="1"
               {...register("stock")}
             />
-            {errors.stock && <p className="text-sm text-red-600">{errors.stock.message}</p>}
+            {errors.stock && <p className="text-sm text-red-600 dark:text-red-400">{errors.stock.message}</p>}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="low_stock_threshold">Low-stock alert</Label>
@@ -224,10 +224,10 @@ export function ProductForm({ categories, initial }: Props) {
       </Card>
 
       {serverError && (
-        <p className="text-sm text-red-600 bg-red-50 rounded-md px-3 py-2">{serverError}</p>
+        <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950 rounded-md px-3 py-2">{serverError}</p>
       )}
 
-      <div className="fixed bottom-0 inset-x-0 bg-white border-t border-zinc-200 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="fixed bottom-0 inset-x-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="max-w-5xl mx-auto flex gap-2">
           {initial && (
             <Button
@@ -237,7 +237,7 @@ export function ProductForm({ categories, initial }: Props) {
               disabled={deleting || isSubmitting}
               aria-label="Delete"
             >
-              <Trash2 className="size-4 text-red-600" />
+              <Trash2 className="size-4 text-red-600 dark:text-red-400" />
             </Button>
           )}
           <Button type="submit" className="flex-1" size="lg" disabled={isSubmitting || deleting}>
@@ -282,14 +282,14 @@ function DiscountHelper({
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3">
-      <p className="text-xs uppercase tracking-wide text-zinc-500">
+    <div className="flex flex-col gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
+      <p className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
         Quick discount on selling price
       </p>
       <div className="grid grid-cols-2 gap-2">
         <div className="flex items-center gap-1">
           <div className="relative flex-1">
-            <Percent className="size-3 absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <Percent className="size-3 absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" />
             <Input
               type="number"
               min="0"
@@ -308,7 +308,7 @@ function DiscountHelper({
         </div>
         <div className="flex items-center gap-1">
           <div className="relative flex-1">
-            <IndianRupee className="size-3 absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <IndianRupee className="size-3 absolute left-2 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" />
             <Input
               type="number"
               min="0"

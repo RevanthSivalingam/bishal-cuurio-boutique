@@ -18,7 +18,7 @@ export function ProductCard({ product, category }: Props) {
   return (
     <Link href={`/inventory/${product.id}/edit`} className="block">
       <Card className="transition-transform active:scale-[0.98] hover:shadow-md">
-        <div className="relative aspect-square bg-zinc-50 p-2">
+        <div className="relative aspect-square bg-zinc-50 dark:bg-zinc-800 p-2">
           {product.image_url ? (
             <Image
               src={product.image_url}
@@ -47,7 +47,7 @@ export function ProductCard({ product, category }: Props) {
             <h3 className="font-medium line-clamp-2 leading-tight">{product.name}</h3>
           </div>
           {category && (
-            <p className="text-xs text-zinc-500">{category.name}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">{category.name}</p>
           )}
           <div className="mt-2 flex items-center justify-between">
             <span className="text-lg font-semibold">{formatINR(product.selling_price)}</span>

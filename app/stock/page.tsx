@@ -130,7 +130,7 @@ export default function StockPage() {
         </Button>
       </div>
 
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Per row: <strong>Set to</strong> an absolute count, or{" "}
         <strong>Adjust by</strong> a delta (e.g. <code>-3</code> for offline
         sales, <code>+10</code> for restock). Rows with empty inputs are
@@ -138,7 +138,7 @@ export default function StockPage() {
       </p>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
         <Input
           placeholder="Search product..."
           value={search}
@@ -147,8 +147,8 @@ export default function StockPage() {
         />
       </div>
 
-      {err && <p className="text-sm text-red-600">{err}</p>}
-      {ok && <p className="text-sm text-emerald-700">{ok}</p>}
+      {err && <p className="text-sm text-red-600 dark:text-red-400">{err}</p>}
+      {ok && <p className="text-sm text-emerald-700 dark:text-emerald-400">{ok}</p>}
 
       {loading ? (
         <ul className="flex flex-col gap-2">
@@ -170,7 +170,7 @@ export default function StockPage() {
           }
         />
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-zinc-500 py-8 text-center">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
           No products match &quot;{search}&quot;.
         </p>
       ) : (
@@ -186,11 +186,11 @@ export default function StockPage() {
             return (
               <li
                 key={r.product.id}
-                className="border border-zinc-200 rounded-xl p-3 flex flex-col gap-3"
+                className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 flex flex-col gap-3"
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium truncate">{r.product.name}</p>
-                  <p className="text-xs text-zinc-500 tabular-nums shrink-0">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 tabular-nums shrink-0">
                     {r.product.stock}
                     {preview !== null && (
                       <>
@@ -198,8 +198,8 @@ export default function StockPage() {
                         <span
                           className={
                             invalid
-                              ? "text-red-600 font-semibold"
-                              : "font-semibold text-zinc-900"
+                              ? "text-red-600 dark:text-red-400 font-semibold"
+                              : "font-semibold text-zinc-900 dark:text-zinc-50"
                           }
                         >
                           {preview}
@@ -209,7 +209,7 @@ export default function StockPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
-                  <div className="flex rounded-md overflow-hidden border border-zinc-200 text-sm w-fit">
+                  <div className="flex rounded-md overflow-hidden border border-zinc-200 dark:border-zinc-800 text-sm w-fit">
                     <button
                       type="button"
                       onClick={() =>
@@ -217,8 +217,8 @@ export default function StockPage() {
                       }
                       className={`px-3 py-1.5 ${
                         r.mode === "set"
-                          ? "bg-zinc-900 text-white"
-                          : "bg-white text-zinc-700"
+                          ? "bg-zinc-900 dark:bg-zinc-100 text-white"
+                          : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
                       }`}
                     >
                       Set to
@@ -228,10 +228,10 @@ export default function StockPage() {
                       onClick={() =>
                         update(r.product.id, { mode: "adjust", value: "" })
                       }
-                      className={`px-3 py-1.5 border-l border-zinc-200 ${
+                      className={`px-3 py-1.5 border-l border-zinc-200 dark:border-zinc-800 ${
                         r.mode === "adjust"
-                          ? "bg-zinc-900 text-white"
-                          : "bg-white text-zinc-700"
+                          ? "bg-zinc-900 dark:bg-zinc-100 text-white"
+                          : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
                       }`}
                     >
                       Adjust by
@@ -278,33 +278,33 @@ export default function StockPage() {
             ))}
           </div>
         ) : log.length === 0 ? (
-          <p className="text-sm text-zinc-500">No history yet.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">No history yet.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {log.map((e) => (
               <li
                 key={e.id}
-                className="border-b border-zinc-100 py-1.5 flex items-center gap-2 flex-wrap"
+                className="border-b border-zinc-100 dark:border-zinc-800 py-1.5 flex items-center gap-2 flex-wrap"
               >
-                <span className="text-zinc-500 text-xs w-32 shrink-0">
+                <span className="text-zinc-500 dark:text-zinc-400 text-xs w-32 shrink-0">
                   {new Date(e.created_at).toLocaleString("en-IN")}
                 </span>
                 <span className="flex-1 truncate">{e.product_name}</span>
-                <span className="text-zinc-600 tabular-nums">
+                <span className="text-zinc-600 dark:text-zinc-400 tabular-nums">
                   {e.old_stock} → {e.new_stock}
                 </span>
                 <span
                   className={`px-1.5 rounded tabular-nums ${
                     e.delta >= 0
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-red-100 text-red-700"
+                      ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
+                      : "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
                   } text-xs`}
                 >
                   {e.delta >= 0 ? "+" : ""}
                   {e.delta}
                 </span>
                 {e.reason && (
-                  <span className="text-xs text-zinc-500">· {e.reason}</span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">· {e.reason}</span>
                 )}
               </li>
             ))}

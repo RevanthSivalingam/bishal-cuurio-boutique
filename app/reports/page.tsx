@@ -96,7 +96,7 @@ export default function ReportsPage() {
           onChange={(e) => setFrom(e.target.value)}
           className="w-auto"
         />
-        <span className="text-zinc-500 text-sm">to</span>
+        <span className="text-zinc-500 dark:text-zinc-400 text-sm">to</span>
         <Input
           type="date"
           value={to}
@@ -120,17 +120,17 @@ export default function ReportsPage() {
             )}
       </section>
 
-      <section className="rounded-xl border border-zinc-200 p-4">
+      <section className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="font-medium">Daily sales</h2>
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">
             {daily.length} {daily.length === 1 ? "day" : "days"}
           </span>
         </div>
         {loading ? (
           <Skeleton className="h-[60px]" />
         ) : totalSales === 0 ? (
-          <p className="text-sm text-zinc-500 py-4">No sales in range.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 py-4">No sales in range.</p>
         ) : (
           <Sparkline
             values={daily}
@@ -149,13 +149,13 @@ export default function ReportsPage() {
             ))}
           </div>
         ) : topProducts.length === 0 ? (
-          <p className="text-sm text-zinc-500">No sales in range.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">No sales in range.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {topProducts.map((p) => (
               <li
                 key={p.name}
-                className="flex justify-between border-b border-zinc-100 py-2"
+                className="flex justify-between border-b border-zinc-100 dark:border-zinc-800 py-2"
               >
                 <span>{p.name}</span>
                 <span className="tabular-nums">{p.qty}</span>
@@ -174,16 +174,16 @@ export default function ReportsPage() {
             ))}
           </div>
         ) : lowStock.length === 0 ? (
-          <p className="text-sm text-zinc-500">All products above threshold.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">All products above threshold.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {lowStock.map((p) => (
               <li
                 key={p.id}
-                className="flex justify-between border-b border-zinc-100 py-2"
+                className="flex justify-between border-b border-zinc-100 dark:border-zinc-800 py-2"
               >
                 <span>{p.name}</span>
-                <span className="text-red-600 tabular-nums">
+                <span className="text-red-600 dark:text-red-400 tabular-nums">
                   stock {p.stock} / threshold {p.low_stock_threshold}
                 </span>
               </li>
@@ -208,14 +208,14 @@ function StatCard({
     <div
       className={`border rounded-xl p-3 ${
         emphasis
-          ? "border-emerald-200 bg-emerald-50"
-          : "border-zinc-200 bg-white"
+          ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950"
+          : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
       }`}
     >
-      <p className="text-xs text-zinc-500 uppercase tracking-wide">{label}</p>
+      <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">{label}</p>
       <p
         className={`font-semibold text-lg tabular-nums ${
-          emphasis ? "text-emerald-800" : ""
+          emphasis ? "text-emerald-800 dark:text-emerald-200" : ""
         }`}
       >
         {value}

@@ -35,7 +35,7 @@ export default function BillPage() {
 
   if (error)
     return (
-      <p className="text-red-600" role="alert">
+      <p className="text-red-600 dark:text-red-400" role="alert">
         {error}
       </p>
     );
@@ -84,18 +84,18 @@ export default function BillPage() {
           <h1 className="font-mono text-3xl font-bold tracking-tight tabular-nums">
             {sale.bill_number}
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
             {new Date(sale.occurred_at).toLocaleString("en-IN")}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {sale.channel === "offline" && (
-            <span className="px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs font-semibold">
+            <span className="px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 text-xs font-semibold">
               OFFLINE
             </span>
           )}
           {sale.status === "void" && (
-            <span className="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">
+            <span className="px-2 py-1 rounded bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-semibold">
               VOID
             </span>
           )}
@@ -103,7 +103,7 @@ export default function BillPage() {
       </div>
 
       {(sale.customer_name || sale.customer_phone) && (
-        <section className="text-sm text-zinc-700 p-3 rounded-lg bg-zinc-50 border border-zinc-200">
+        <section className="text-sm text-zinc-700 dark:text-zinc-300 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
           {sale.customer_name && <p>Customer: {sale.customer_name}</p>}
           {sale.customer_phone && <p>Phone: {sale.customer_phone}</p>}
         </section>
@@ -111,7 +111,7 @@ export default function BillPage() {
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left border-b border-zinc-200">
+          <tr className="text-left border-b border-zinc-200 dark:border-zinc-800">
             <th className="py-2">Item</th>
             <th className="py-2 text-right">Qty</th>
             <th className="py-2 text-right">Price</th>
@@ -120,7 +120,7 @@ export default function BillPage() {
         </thead>
         <tbody>
           {items.map((i) => (
-            <tr key={i.id} className="border-b border-zinc-100">
+            <tr key={i.id} className="border-b border-zinc-100 dark:border-zinc-800">
               <td className="py-2">{i.product_name}</td>
               <td className="py-2 text-right tabular-nums">{i.quantity}</td>
               <td className="py-2 text-right tabular-nums">
@@ -147,7 +147,7 @@ export default function BillPage() {
             </span>
           </div>
         )}
-        <div className="flex justify-between text-lg font-semibold border-t border-zinc-200 pt-2">
+        <div className="flex justify-between text-lg font-semibold border-t border-zinc-200 dark:border-zinc-800 pt-2">
           <span>Total</span>
           <span className="tabular-nums">{formatINR(sale.total)}</span>
         </div>

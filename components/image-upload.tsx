@@ -59,15 +59,15 @@ export function ImageUpload({ value, onChange }: Props) {
         onChange={handleFile}
       />
       {value ? (
-        <div className="relative aspect-square w-full max-w-[200px] rounded-xl overflow-hidden border border-zinc-200 bg-zinc-50 p-2">
+        <div className="relative aspect-square w-full max-w-[200px] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 p-2">
           <Image src={value} alt="Product" fill className="object-contain" sizes="200px" />
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="absolute top-2 right-2 bg-white/90 rounded-full p-2 shadow"
+            className="absolute top-2 right-2 bg-white/90 dark:bg-zinc-900/90 rounded-full p-2 shadow"
             aria-label="Remove image"
           >
-            <Trash2 className="size-4 text-red-600" />
+            <Trash2 className="size-4 text-red-600 dark:text-red-400" />
           </button>
         </div>
       ) : (
@@ -89,7 +89,7 @@ export function ImageUpload({ value, onChange }: Props) {
           )}
         </Button>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

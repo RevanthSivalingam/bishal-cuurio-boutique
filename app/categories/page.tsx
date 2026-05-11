@@ -106,14 +106,14 @@ export default function CategoriesPage() {
         </Button>
       </div>
 
-      {err && <p className="text-sm text-red-600">{err}</p>}
-      {loading && <p className="text-sm text-zinc-500">Loading...</p>}
+      {err && <p className="text-sm text-red-600 dark:text-red-400">{err}</p>}
+      {loading && <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading...</p>}
 
       <ul className="flex flex-col gap-2">
         {cats.map((c) => (
           <li
             key={c.id}
-            className="flex items-center justify-between border border-zinc-200 rounded-xl px-3 py-2"
+            className="flex items-center justify-between border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2"
           >
             {editingId === c.id ? (
               <div className="flex gap-2 w-full">
@@ -155,7 +155,7 @@ export default function CategoriesPage() {
                     onClick={() => remove(c.id)}
                     aria-label="Delete"
                   >
-                    <Trash2 className="size-4 text-red-600" />
+                    <Trash2 className="size-4 text-red-600 dark:text-red-400" />
                   </Button>
                 </div>
               </>
@@ -163,7 +163,7 @@ export default function CategoriesPage() {
           </li>
         ))}
         {!loading && cats.length === 0 && (
-          <li className="text-sm text-zinc-500">No categories yet.</li>
+          <li className="text-sm text-zinc-500 dark:text-zinc-400">No categories yet.</li>
         )}
       </ul>
     </div>

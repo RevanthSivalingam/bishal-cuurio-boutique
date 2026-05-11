@@ -37,7 +37,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold tracking-tight">
             {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
             Sign in to manage your shop.
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function LoginPage() {
             />
           </div>
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 rounded-md px-3 py-2">{error}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950 rounded-md px-3 py-2">{error}</p>
           )}
           <Button type="submit" disabled={loading} size="lg">
             {loading ? "Signing in…" : "Sign in"}

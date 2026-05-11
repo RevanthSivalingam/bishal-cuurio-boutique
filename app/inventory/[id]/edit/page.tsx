@@ -25,7 +25,7 @@ export default async function EditProductPage({ params }: Params) {
       <div className="flex items-center gap-2">
         <Link
           href="/inventory"
-          className="p-2 -ml-2 rounded-md hover:bg-zinc-100"
+          className="p-2 -ml-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
           aria-label="Back"
         >
           <ArrowLeft className="size-5" />

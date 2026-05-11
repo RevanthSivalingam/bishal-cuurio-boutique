@@ -72,7 +72,7 @@ export default function SalesListPage() {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value as typeof status)}
-          className="border border-zinc-200 rounded-md px-3 text-sm"
+          className="border border-zinc-200 dark:border-zinc-800 rounded-md px-3 text-sm"
         >
           <option value="all">All</option>
           <option value="active">Active</option>
@@ -80,7 +80,7 @@ export default function SalesListPage() {
         </select>
       </div>
 
-      {err && <p className="text-red-600 text-sm">{err}</p>}
+      {err && <p className="text-red-600 dark:text-red-400 text-sm">{err}</p>}
 
       {loading ? (
         <ul className="flex flex-col gap-2">
@@ -103,7 +103,7 @@ export default function SalesListPage() {
         />
       ) : (
         <>
-          <p className="text-sm text-zinc-600">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
             {sales.length} bills · Total (active):{" "}
             <strong>{formatINR(totalActive)}</strong>
           </p>
@@ -112,15 +112,15 @@ export default function SalesListPage() {
               <li key={s.id}>
                 <Link
                   href={`/sales/${s.id}`}
-                  className="block border border-zinc-200 rounded-xl p-3 hover:bg-zinc-50"
+                  className="block border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium">{s.bill_number}</span>
                     <span
                       className={
                         s.status === "void"
-                          ? "text-red-600 text-xs"
-                          : "text-xs text-zinc-500"
+                          ? "text-red-600 dark:text-red-400 text-xs"
+                          : "text-xs text-zinc-500 dark:text-zinc-400"
                       }
                     >
                       {s.status === "void"
@@ -129,10 +129,10 @@ export default function SalesListPage() {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm mt-1 items-center gap-2">
-                    <span className="text-zinc-600 truncate flex items-center gap-2">
+                    <span className="text-zinc-600 dark:text-zinc-400 truncate flex items-center gap-2">
                       {s.customer_name ?? "Walk-in"}
                       {s.channel === "offline" && (
-                        <span className="text-xs px-1.5 rounded bg-amber-100 text-amber-800">
+                        <span className="text-xs px-1.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200">
                           Offline
                         </span>
                       )}
