@@ -119,7 +119,7 @@ function Chip({
       onClick={onClick}
       className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors tabular-nums ${
         active
-          ? "bg-zinc-900 dark:bg-zinc-100 text-white border-zinc-900"
+          ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
           : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
       }`}
     >

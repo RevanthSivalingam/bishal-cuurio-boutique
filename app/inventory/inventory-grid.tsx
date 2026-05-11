@@ -116,8 +116,8 @@ function CategoryChip({
       className={
         "shrink-0 px-3 h-9 rounded-full text-sm font-medium transition-colors " +
         (active
-          ? "bg-zinc-900 dark:bg-zinc-100 text-white"
-          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200")
+          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700")
       }
     >
       {label}
