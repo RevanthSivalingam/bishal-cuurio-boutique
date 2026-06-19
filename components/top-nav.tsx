@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const PUBLIC_NAV = [{ href: "/", label: "Catalog", Icon: Home }];
 
@@ -98,6 +99,9 @@ export function TopNav() {
               {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
             </span>
           </Link>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

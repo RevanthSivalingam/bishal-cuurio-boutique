@@ -5,8 +5,10 @@ import { ChevronRight } from "lucide-react";
 import { TopNav } from "@/components/top-nav";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { ShareButtons } from "@/components/share-buttons";
+import { EnquireButton } from "@/components/enquire-button";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatINR } from "@/lib/money";
+import { availability } from "@/lib/availability";
 import type { Category, Product } from "@/lib/schemas";
 
 export const dynamic = "force-dynamic";
@@ -37,17 +39,32 @@ export default async function ProductDetailPage({
   }
 
   const p = product as Product;
+  const priceLabel = formatINR(p.selling_price);
+  const av = availability(p.stock, p.low_stock_threshold);
+  const inStock = p.stock > 0;
+  const dotClass =
+    av.tone === "low"
+      ? "bg-amber-500"
+      : av.tone === "out"
+        ? "bg-mist"
+        : "bg-brass";
+  const availClass =
+    av.tone === "one"
+      ? "text-brass"
+      : av.tone === "low"
+        ? "text-amber-700 dark:text-amber-300"
+        : "text-mist";
 
   return (
     <>
       <TopNav />
-      <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-4">
-        <nav aria-label="Breadcrumb" className="mb-4">
-          <ol className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400 flex-wrap">
+      <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-6 bg-paper text-ink">
+        <nav aria-label="Breadcrumb" className="mb-6">
+          <ol className="flex items-center gap-1 text-sm text-mist flex-wrap">
             <li>
               <Link
                 href="/"
-                className="hover:text-zinc-800 hover:underline underline-offset-4"
+                className="hover:text-ink hover:underline underline-offset-4 decoration-brass"
               >
                 Catalog
               </Link>
@@ -55,7 +72,7 @@ export default async function ProductDetailPage({
             {category && (
               <>
                 <li>
-                  <ChevronRight className="size-3.5 text-zinc-400 dark:text-zinc-500" />
+                  <ChevronRight className="size-3.5 text-mist" />
                 </li>
                 <li>
                   <span>{category.name}</span>
@@ -63,11 +80,11 @@ export default async function ProductDetailPage({
               </>
             )}
             <li>
-              <ChevronRight className="size-3.5 text-zinc-400 dark:text-zinc-500" />
+              <ChevronRight className="size-3.5 text-mist" />
             </li>
             <li
               aria-current="page"
-              className="text-zinc-800 dark:text-zinc-100 font-medium truncate max-w-[40ch]"
+              className="text-ink font-medium truncate max-w-[40ch]"
             >
               {p.name}
             </li>
@@ -75,7 +92,7 @@ export default async function ProductDetailPage({
         </nav>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="relative aspect-square bg-zinc-50 dark:bg-zinc-800 rounded-xl overflow-hidden p-4">
+          <div className="relative aspect-square bg-paper-panel border border-paper-edge rounded-xl overflow-hidden p-4">
             {p.image_url ? (
               <Image
                 src={p.image_url}
@@ -91,21 +108,27 @@ export default async function ProductDetailPage({
           </div>
 
           <div className="flex flex-col gap-4">
-            {category && (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-                {category.name}
-              </p>
-            )}
-            <h1 className="text-3xl md:text-4xl font-[family-name:var(--font-display)] font-semibold leading-tight">
+            <p className="specimen-label text-mist">
+              № {p.id.slice(0, 6)}
+              {category && <span> · {category.name}</span>}
+            </p>
+            <h1 className="text-3xl md:text-4xl font-[family-name:var(--font-display)] leading-tight text-ink">
               {p.name}
             </h1>
-            <p className="text-3xl font-bold tabular-nums">
-              {formatINR(p.selling_price)}
+            <p className={`inline-flex items-center gap-2 specimen-label ${availClass}`}>
+              <span className={`size-1.5 rounded-full ${dotClass}`} aria-hidden="true" />
+              {av.label}
             </p>
-            <ShareButtons
-              title={p.name}
-              text={`${p.name} · ${formatINR(p.selling_price)}`}
-            />
+            <p className="text-3xl font-[family-name:var(--font-display)] tabular-nums text-ink">
+              {priceLabel}
+            </p>
+            <div className="flex flex-col gap-3 pt-1">
+              <EnquireButton name={p.name} price={priceLabel} available={inStock} />
+              <ShareButtons
+                title={p.name}
+                text={`${p.name} · ${priceLabel}`}
+              />
+            </div>
           </div>
         </div>
       </main>

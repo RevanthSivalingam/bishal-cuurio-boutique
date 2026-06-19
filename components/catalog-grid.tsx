@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
 import { CatalogCard } from "@/components/catalog-card";
 import type { Category, Product } from "@/lib/schemas";
 
@@ -40,15 +41,11 @@ export function CatalogGrid({ products, categories }: Props) {
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center text-center py-16 gap-4">
-        <div className="size-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-          <Package className="size-8 text-zinc-400 dark:text-zinc-500" aria-hidden="true" />
-        </div>
-        <h2 className="font-medium text-lg">Catalog coming soon</h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-          No products have been listed yet.
-        </p>
-      </div>
+      <EmptyState
+        icon={Package}
+        title="The shelves are being set"
+        description="New pieces are on their way. Check back soon to see what's arrived."
+      />
     );
   }
 
@@ -86,11 +83,11 @@ export function CatalogGrid({ products, categories }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-8">
-          No products match your filter.
+        <p className="text-sm text-mist text-center py-8">
+          Nothing here matches — try a different word or category.
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 reveal">
           {filtered.map((p) => (
             <CatalogCard
               key={p.id}
@@ -119,8 +116,8 @@ function Chip({
       onClick={onClick}
       className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors tabular-nums ${
         active
-          ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-          : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+          ? "bg-brass-deep text-white border-brass-deep dark:text-[#14130f]"
+          : "bg-paper border-paper-edge text-mist hover:text-ink hover:border-brass"
       }`}
     >
       {label}

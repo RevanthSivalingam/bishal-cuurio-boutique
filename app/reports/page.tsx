@@ -130,7 +130,7 @@ export default function ReportsPage() {
         {loading ? (
           <Skeleton className="h-[60px]" />
         ) : totalSales === 0 ? (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 py-4">No sales in range.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 py-4">No sales in this range yet.</p>
         ) : (
           <Sparkline
             values={daily}
@@ -149,7 +149,7 @@ export default function ReportsPage() {
             ))}
           </div>
         ) : topProducts.length === 0 ? (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">No sales in range.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">No sales in this range yet.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {topProducts.map((p) => (
@@ -174,7 +174,7 @@ export default function ReportsPage() {
             ))}
           </div>
         ) : lowStock.length === 0 ? (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">All products above threshold.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Every product is above its low-stock threshold.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {lowStock.map((p) => (

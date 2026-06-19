@@ -43,7 +43,7 @@ export function ShareButtons({ title, text, url }: Props) {
 
   return (
     <div className="flex gap-2">
-      <Button type="button" variant="brand" size="md" onClick={shareNative}>
+      <Button type="button" variant="outline" size="md" onClick={shareNative}>
         <Share2 className="size-4" />
         Share
       </Button>
