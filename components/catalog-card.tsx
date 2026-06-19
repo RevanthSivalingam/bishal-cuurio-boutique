@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { formatINR } from "@/lib/money";
+import { availability } from "@/lib/availability";
 import type { Product, Category } from "@/lib/schemas";
 
 type Props = {
@@ -11,10 +12,14 @@ type Props = {
 };
 
 export function CatalogCard({ product, category }: Props) {
+  const av = availability(product.stock, product.low_stock_threshold);
+  // Only flag the urgency cases on cards — "in stock" needs no badge.
+  const urgent = av.tone === "one" || av.tone === "low";
+
   return (
     <Link href={`/product/${product.id}`} className="block">
-      <Card className="transition-transform active:scale-[0.98] hover:shadow-md overflow-hidden">
-        <div className="relative aspect-square bg-zinc-50 dark:bg-zinc-800 p-2">
+      <Card className="border-paper-edge bg-paper transition-transform active:scale-[0.98] hover:shadow-md overflow-hidden">
+        <div className="relative aspect-square bg-paper-panel p-2">
           {product.image_url ? (
             <Image
               src={product.image_url}
@@ -26,11 +31,22 @@ export function CatalogCard({ product, category }: Props) {
           ) : (
             <InitialsAvatar name={product.name} />
           )}
+          {urgent && (
+            <span className="absolute top-2 left-2 specimen-label text-brass bg-paper/90 backdrop-blur px-2 py-1 rounded">
+              {av.label}
+            </span>
+          )}
         </div>
-        <div className="p-3 flex flex-col gap-1">
-          <h3 className="font-medium line-clamp-2 leading-tight">{product.name}</h3>
-          {category && <p className="text-xs text-zinc-500 dark:text-zinc-400">{category.name}</p>}
-          <p className="mt-1 text-lg font-semibold">{formatINR(product.selling_price)}</p>
+        <div className="p-3 flex flex-col gap-1.5">
+          {category && (
+            <p className="specimen-label text-mist truncate">{category.name}</p>
+          )}
+          <h3 className="font-[family-name:var(--font-display)] line-clamp-2 leading-tight text-ink">
+            {product.name}
+          </h3>
+          <p className="mt-0.5 font-mono text-sm tabular-nums text-ink">
+            {formatINR(product.selling_price)}
+          </p>
         </div>
       </Card>
     </Link>

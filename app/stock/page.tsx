@@ -260,7 +260,9 @@ export default function StockPage() {
             ))}
           </div>
         ) : log.length === 0 ? (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">No history yet.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            No adjustments recorded yet. Saved changes will show up here.
+          </p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {log.map((e) => (

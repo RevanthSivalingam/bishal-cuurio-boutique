@@ -259,15 +259,26 @@ function NewSalePage() {
 
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-      <Button
-        type="button"
-        variant="brand"
-        size="lg"
-        onClick={checkout}
-        disabled={submitting || lines.length === 0}
-      >
-        {submitting ? "Processing..." : `Checkout · ${formatINR(total)}`}
-      </Button>
+      <div className="sticky bottom-0 -mx-4 flex items-center gap-3 border-t border-zinc-200 bg-background/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur dark:border-zinc-800">
+        <div className="flex flex-col">
+          <span className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Total
+          </span>
+          <span className="text-xl font-semibold tabular-nums">
+            {formatINR(total)}
+          </span>
+        </div>
+        <Button
+          type="button"
+          variant="brand"
+          size="lg"
+          onClick={checkout}
+          disabled={submitting || lines.length === 0}
+          className="ml-auto"
+        >
+          {submitting ? "Processing..." : "Checkout"}
+        </Button>
+      </div>
     </div>
   );
 }

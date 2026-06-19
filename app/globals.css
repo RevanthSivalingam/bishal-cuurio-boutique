@@ -12,6 +12,15 @@
   --brand-hover: #047857;
   --danger: #dc2626;
   --danger-foreground: #ffffff;
+
+  /* Storefront identity — "The Vitrine" (used only on public catalog/product) */
+  --paper: #fbfaf7;
+  --paper-panel: #f2eee6;
+  --paper-edge: #e7e2d8;
+  --ink: #1a1a17;
+  --mist: #6b6b63;
+  --brass: #a6783f;
+  --brass-deep: #7a5a2e;
 }
 
 .dark,
@@ -27,6 +36,14 @@
   --brand-hover: #34d399;
   --danger: #f87171;
   --danger-foreground: #450a0a;
+
+  --paper: #14130f;
+  --paper-panel: #1e1c17;
+  --paper-edge: #2a2720;
+  --ink: #f5f1e8;
+  --mist: #a8a296;
+  --brass: #c79a5a;
+  --brass-deep: #c79a5a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -42,6 +59,14 @@
     --brand-hover: #34d399;
     --danger: #f87171;
     --danger-foreground: #450a0a;
+
+    --paper: #14130f;
+    --paper-panel: #1e1c17;
+    --paper-edge: #2a2720;
+    --ink: #f5f1e8;
+    --mist: #a8a296;
+    --brass: #c79a5a;
+    --brass-deep: #c79a5a;
   }
 }
 
@@ -55,9 +80,25 @@
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-hover: var(--brand-hover);
+  --color-paper: var(--paper);
+  --color-paper-panel: var(--paper-panel);
+  --color-paper-edge: var(--paper-edge);
+  --color-ink: var(--ink);
+  --color-mist: var(--mist);
+  --color-brass: var(--brass);
+  --color-brass-deep: var(--brass-deep);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-calistoga);
+}
+
+/* Gallery-label treatment — small caps, mono, letter-spaced (the storefront signature) */
+.specimen-label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
 }
 
 html,
@@ -89,6 +130,15 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite linear;
   border-radius: 0.5rem;
+}
+
+/* Storefront grid reveal on load — one quiet fade-up, not per-card theatrics */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.reveal {
+  animation: rise 0.5s ease both;
 }
 
 /* touch-friendly number input — strip spinners on mobile */

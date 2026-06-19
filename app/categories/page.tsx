@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, Tags } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Category } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function CategoriesPage() {
   const [cats, setCats] = useState<Category[]>([]);
@@ -162,10 +163,15 @@ export default function CategoriesPage() {
             )}
           </li>
         ))}
-        {!loading && cats.length === 0 && (
-          <li className="text-sm text-zinc-500 dark:text-zinc-400">No categories yet.</li>
-        )}
       </ul>
+
+      {!loading && cats.length === 0 && (
+        <EmptyState
+          icon={Tags}
+          title="No categories yet"
+          description="Add your first category above to start grouping products in the catalog."
+        />
+      )}
     </div>
   );
 }
