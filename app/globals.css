@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Drive `dark:` utilities off the .dark class (set by the theme toggle / pre-paint
+   script) instead of Tailwind v4's default prefers-color-scheme media query. This
+   keeps Tailwind utilities in sync with the CSS-variable blocks below — otherwise a
+   manual light choice on a dark-OS device leaves the chrome stuck dark. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #fafaf9;
   --foreground: #0a0a0a;
