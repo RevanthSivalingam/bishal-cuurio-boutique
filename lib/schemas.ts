@@ -52,6 +52,12 @@ export const createSaleInputSchema = z.object({
 });
 export type CreateSaleInput = z.infer<typeof createSaleInputSchema>;
 
+export const updateSaleCustomerSchema = z.object({
+  customer_name: z.string().trim().max(80).optional().or(z.literal("")),
+  customer_phone: z.string().trim().max(20).optional().or(z.literal("")),
+});
+export type UpdateSaleCustomerInput = z.infer<typeof updateSaleCustomerSchema>;
+
 export type Sale = {
   id: string;
   owner_id: string;
