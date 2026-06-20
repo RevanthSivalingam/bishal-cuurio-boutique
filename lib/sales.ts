@@ -54,22 +54,54 @@ export async function fetchSale(supabase: SupabaseClient, saleId: string) {
   return { sale: sale as Sale, items: (items ?? []) as SaleItem[] };
 }
 
+export type ListSalesParams = {
+  from?: string;
+  to?: string;
+  status?: "active" | "void";
+  search?: string; // matches customer_name OR customer_phone
+  limit?: number; // default 10
+  offset?: number; // default 0
+};
+
 export async function listSales(
   supabase: SupabaseClient,
-  from: string,
-  to: string,
-  status?: "active" | "void"
-) {
-  let q = supabase
-    .from("sales")
-    .select("*")
-    .gte("occurred_at", from)
-    .lte("occurred_at", to)
-    .order("occurred_at", { ascending: false });
+  params: ListSalesParams = {}
+): Promise<{ rows: Sale[]; count: number }> {
+  const { from, to, status, search, limit = 10, offset = 0 } = params;
+  let q = supabase.from("sales").select("*", { count: "exact" });
+  if (from) q = q.gte("occurred_at", from);
+  if (to) q = q.lte("occurred_at", to);
   if (status) q = q.eq("status", status);
-  const { data, error } = await q;
+  // sanitize for PostgREST .or()/ilike — bare , ( ) % would corrupt the filter
+  const term = search?.trim().replace(/[%,()]/g, "");
+  if (term) {
+    q = q.or(`customer_name.ilike.%${term}%,customer_phone.ilike.%${term}%`);
+  }
+  q = q
+    .order("occurred_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+  const { data, error, count } = await q;
   if (error) throw new Error(error.message);
-  return (data ?? []) as Sale[];
+  return { rows: (data ?? []) as Sale[], count: count ?? 0 };
+}
+
+export async function updateSaleCustomer(
+  supabase: SupabaseClient,
+  saleId: string,
+  customer_name?: string,
+  customer_phone?: string
+): Promise<Sale> {
+  const { data, error } = await supabase
+    .from("sales")
+    .update({
+      customer_name: customer_name?.trim() || null,
+      customer_phone: customer_phone?.trim() || null,
+    })
+    .eq("id", saleId)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return data as Sale;
 }
 
 export async function adjustStock(

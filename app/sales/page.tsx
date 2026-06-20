@@ -12,31 +12,60 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatINR } from "@/lib/money";
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
+const PAGE_SIZE = 10;
 
 export default function SalesListPage() {
-  const [date, setDate] = useState(todayISO());
+  const [date, setDate] = useState(""); // empty = all history
   const [status, setStatus] = useState<"all" | "active" | "void">("all");
-  const [sales, setSales] = useState<Sale[]>([]);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [rows, setRows] = useState<Sale[]>([]);
+  const [count, setCount] = useState(0);
+  const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  // Debounce the search box (~300ms)
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // Reset to first page whenever a filter changes
+  useEffect(() => {
+    setOffset(0);
+  }, [date, status, debouncedSearch]);
+
+  // Build the params shared by initial load and "show more"
+  const buildParams = (nextOffset: number) => {
+    const from = date ? new Date(`${date}T00:00:00`).toISOString() : undefined;
+    const to = date ? new Date(`${date}T23:59:59.999`).toISOString() : undefined;
+    return {
+      from,
+      to,
+      status: status === "all" ? undefined : status,
+      search: debouncedSearch || undefined,
+      limit: PAGE_SIZE,
+      offset: nextOffset,
+    };
+  };
+
+  // Fetch first page (replaces rows) on any filter change
   useEffect(() => {
     let cancelled = false;
     const supabase = createSupabaseBrowserClient();
-    const from = new Date(`${date}T00:00:00`).toISOString();
-    const to = new Date(`${date}T23:59:59.999`).toISOString();
-    // (filters by sales.occurred_at — may include back-dated offline sales)
     const run = async () => {
       setLoading(true);
+      setErr(null);
       try {
-        const data = await listSales(
+        const { rows: data, count: total } = await listSales(
           supabase,
-          from,
-          to,
-          status === "all" ? undefined : status
+          buildParams(0)
         );
-        if (!cancelled) setSales(data);
+        if (cancelled) return;
+        setRows(data);
+        setCount(total);
       } catch (e) {
         if (!cancelled) setErr(e instanceof Error ? e.message : "Load failed");
       } finally {
@@ -47,11 +76,31 @@ export default function SalesListPage() {
     return () => {
       cancelled = true;
     };
-  }, [date, status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, status, debouncedSearch]);
 
-  const totalActive = sales
-    .filter((s) => s.status === "active")
-    .reduce((sum, s) => sum + s.total, 0);
+  const showMore = async () => {
+    const nextOffset = offset + PAGE_SIZE;
+    setLoadingMore(true);
+    setErr(null);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { rows: data, count: total } = await listSales(
+        supabase,
+        buildParams(nextOffset)
+      );
+      setRows((curr) => [...curr, ...data]);
+      setCount(total);
+      setOffset(nextOffset);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Load failed");
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const filtersActive = Boolean(date || debouncedSearch || status !== "all");
+  const hasMore = rows.length < count;
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-4">
@@ -64,6 +113,13 @@ export default function SalesListPage() {
 
       <div className="flex gap-2 flex-wrap">
         <Input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search name or phone"
+          className="w-auto flex-1 min-w-[12rem]"
+        />
+        <Input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
@@ -72,7 +128,7 @@ export default function SalesListPage() {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value as typeof status)}
-          className="border border-zinc-200 dark:border-zinc-800 rounded-md px-3 text-sm"
+          className="border border-zinc-200 dark:border-zinc-800 rounded-md px-3 text-sm bg-transparent"
         >
           <option value="all">All</option>
           <option value="active">Active</option>
@@ -90,11 +146,15 @@ export default function SalesListPage() {
             </li>
           ))}
         </ul>
-      ) : sales.length === 0 ? (
+      ) : rows.length === 0 ? (
         <EmptyState
           icon={Receipt}
-          title="No bills for this date"
-          description="Ready to ring up your first sale of the day?"
+          title={filtersActive ? "No bills match" : "No sales yet"}
+          description={
+            filtersActive
+              ? "Try a different date, name, or phone number."
+              : "Ready to ring up your first sale?"
+          }
           action={
             <Link href="/sales/new">
               <Button variant="brand">+ New sale</Button>
@@ -104,11 +164,10 @@ export default function SalesListPage() {
       ) : (
         <>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {sales.length} bills · Total (active):{" "}
-            <strong>{formatINR(totalActive)}</strong>
+            {count} {count === 1 ? "bill" : "bills"}
           </p>
           <ul className="flex flex-col gap-2">
-            {sales.map((s) => (
+            {rows.map((s) => (
               <li key={s.id}>
                 <Link
                   href={`/sales/${s.id}`}
@@ -125,7 +184,12 @@ export default function SalesListPage() {
                     >
                       {s.status === "void"
                         ? "VOID"
-                        : new Date(s.occurred_at).toLocaleTimeString("en-IN")}
+                        : new Date(s.occurred_at).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm mt-1 items-center gap-2">
@@ -143,6 +207,19 @@ export default function SalesListPage() {
               </li>
             ))}
           </ul>
+
+          {hasMore && (
+            <Button
+              variant="outline"
+              onClick={showMore}
+              disabled={loadingMore}
+              className="self-center"
+            >
+              {loadingMore
+                ? "Loading…"
+                : `Show more (${count - rows.length} left)`}
+            </Button>
+          )}
         </>
       )}
     </div>

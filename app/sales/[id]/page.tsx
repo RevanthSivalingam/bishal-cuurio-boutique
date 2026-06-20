@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Printer, Download, Copy } from "lucide-react";
+import { Printer, Download, Copy, Pencil } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { fetchSale, voidSale } from "@/lib/sales";
+import { fetchSale, voidSale, updateSaleCustomer } from "@/lib/sales";
 import type { Sale, SaleItem } from "@/lib/schemas";
+import { updateSaleCustomerSchema } from "@/lib/schemas";
 import { generateBillPdf } from "@/components/bill-pdf";
 import { VoidDialog } from "@/components/void-dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatINR } from "@/lib/money";
 
@@ -22,6 +24,10 @@ export default function BillPage() {
   const [items, setItems] = useState<SaleItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(false);
+  const [custName, setCustName] = useState("");
+  const [custPhone, setCustPhone] = useState("");
+  const [savingCustomer, setSavingCustomer] = useState(false);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -77,6 +83,41 @@ export default function BillPage() {
     router.refresh();
   };
 
+  const startEditCustomer = () => {
+    setCustName(sale.customer_name ?? "");
+    setCustPhone(sale.customer_phone ?? "");
+    setError(null);
+    setEditingCustomer(true);
+  };
+
+  const saveCustomer = async () => {
+    setError(null);
+    const parsed = updateSaleCustomerSchema.safeParse({
+      customer_name: custName,
+      customer_phone: custPhone,
+    });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Invalid details");
+      return;
+    }
+    setSavingCustomer(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const updated = await updateSaleCustomer(
+        supabase,
+        sale.id,
+        custName,
+        custPhone
+      );
+      setSale(updated);
+      setEditingCustomer(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save details");
+    } finally {
+      setSavingCustomer(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
@@ -102,12 +143,64 @@ export default function BillPage() {
         </div>
       </div>
 
-      {(sale.customer_name || sale.customer_phone) && (
-        <section className="text-sm text-zinc-700 dark:text-zinc-300 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
-          {sale.customer_name && <p>Customer: {sale.customer_name}</p>}
-          {sale.customer_phone && <p>Phone: {sale.customer_phone}</p>}
-        </section>
-      )}
+      <section className="text-sm text-zinc-700 dark:text-zinc-300 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
+        {editingCustomer ? (
+          <div className="flex flex-col gap-2 no-print">
+            <Input
+              placeholder="Customer name"
+              value={custName}
+              onChange={(e) => setCustName(e.target.value)}
+            />
+            <Input
+              placeholder="Phone"
+              value={custPhone}
+              onChange={(e) => setCustPhone(e.target.value)}
+            />
+            <div className="flex gap-2">
+              <Button
+                variant="brand"
+                size="sm"
+                onClick={saveCustomer}
+                disabled={savingCustomer}
+              >
+                {savingCustomer ? "Saving…" : "Save"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingCustomer(false)}
+                disabled={savingCustomer}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : sale.customer_name || sale.customer_phone ? (
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              {sale.customer_name && <p>Customer: {sale.customer_name}</p>}
+              {sale.customer_phone && <p>Phone: {sale.customer_phone}</p>}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={startEditCustomer}
+              className="no-print shrink-0"
+            >
+              <Pencil className="size-4" />
+              Edit
+            </Button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="underline no-print"
+            onClick={startEditCustomer}
+          >
+            + Add customer details
+          </button>
+        )}
+      </section>
 
       <table className="w-full text-sm">
         <thead>
