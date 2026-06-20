@@ -111,29 +111,40 @@ export default function SalesListPage() {
         </Link>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-col gap-2">
         <Input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search name or phone"
-          className="w-auto flex-1 min-w-[12rem]"
         />
-        <Input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-auto"
-        />
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value as typeof status)}
-          className="border border-zinc-200 dark:border-zinc-800 rounded-md px-3 text-sm bg-transparent"
-        >
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="void">Void</option>
-        </select>
+        <div className="flex gap-2 items-center">
+          <Input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-[9.5rem] shrink-0"
+          />
+          {date && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDate("")}
+              aria-label="Clear date filter"
+            >
+              Clear
+            </Button>
+          )}
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as typeof status)}
+            className="ml-auto h-11 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 text-sm bg-white dark:bg-zinc-900"
+          >
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="void">Void</option>
+          </select>
+        </div>
       </div>
 
       {err && <p className="text-red-600 dark:text-red-400 text-sm">{err}</p>}
