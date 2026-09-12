@@ -472,7 +472,9 @@ All five files are identical except the `max-w-*` class on `<main>`: inventory/s
 **Files:**
 - Modify: `components/top-nav.tsx`
 
-This is the last file with raw zinc `dark:` pairs for neutral chrome (11 occurrences). The scrim (`bg-black/40 dark:bg-black/60`) is intentionally left as-is — it's a one-off overlay treatment, not part of the two-systems bug.
+This file has 11 raw-zinc `dark:` occurrences for neutral chrome, converted below. The scrim (`bg-black/40 dark:bg-black/60`) is intentionally left as-is — it's a one-off overlay treatment, not part of the two-systems bug.
+
+**Correction (added after this plan's final review):** this task's original text called `top-nav.tsx` "the last file with raw zinc `dark:` pairs," which turned out to be wrong — the plan's original audit (§ Admin & design-system cleanup) covered only the pages/components already flagged as debt, not the full tree. The final review found 43 raw-`zinc-` lines still remaining across 13 other files after this task landed (`/sales/new`, `/sales/[id]`, `/inventory/new`, `/inventory/[id]/edit`, `/login`, and the `cart`, `void-dialog`, `product-picker`, `product-card`, `product-form`, `image-upload`, `theme-toggle` components), including two now-visible inconsistencies from the partial migration (a border-weight mismatch on `/sales/[id]`, and two adjacent header buttons — the hamburger and the theme toggle — with different press-feedback styles). Completing that migration is real follow-up work, tracked outside this plan, not something this task actually finished.
 
 - [ ] **Step 1: Replace the header bar classes**
 
