@@ -33,7 +33,7 @@ export function SelectionBar() {
                 type="button"
                 onClick={() => remove(item.id)}
                 aria-label={`Remove ${item.name}`}
-                className="p-1 opacity-70 hover:opacity-100"
+                className="p-2.5 opacity-70 hover:opacity-100"
               >
                 <X className="size-3.5" />
               </button>
@@ -46,11 +46,15 @@ export function SelectionBar() {
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          className="text-sm font-medium underline underline-offset-2"
+          className="min-h-11 text-sm font-medium underline underline-offset-2"
         >
           {items.length} selected
         </button>
-        <button type="button" onClick={clear} className="text-sm opacity-70 hover:opacity-100">
+        <button
+          type="button"
+          onClick={clear}
+          className="min-h-11 text-sm opacity-70 hover:opacity-100"
+        >
           Clear all
         </button>
         <button

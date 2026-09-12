@@ -124,7 +124,7 @@ export default async function ProductDetailPage({
               {priceLabel}
             </p>
             <div className="flex flex-col gap-3 pt-1">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <EnquireButton name={p.name} price={priceLabel} available={inStock} />
                 <SelectToggle
                   item={{ id: p.id, name: p.name, price: p.selling_price }}

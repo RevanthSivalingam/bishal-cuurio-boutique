@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { formatINR } from "./money";
 
 const STORAGE_KEY = "cuurio:selection";
@@ -8,13 +9,20 @@ export type SelectedItem = {
   price: number;
 };
 
+const selectedItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  price: z.number(),
+});
+const selectionSchema = z.array(selectedItemSchema);
+
 export function readSelection(): SelectedItem[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    const result = selectionSchema.safeParse(JSON.parse(raw));
+    return result.success ? result.data : [];
   } catch {
     return [];
   }

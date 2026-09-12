@@ -65,4 +65,12 @@ describe("readSelection / writeSelection", () => {
     window.localStorage.setItem("cuurio:selection", "{not valid json");
     expect(readSelection()).toEqual([]);
   });
+  it("returns an empty array for validly-parsed JSON with malformed elements (null)", () => {
+    window.localStorage.setItem("cuurio:selection", "[null]");
+    expect(readSelection()).toEqual([]);
+  });
+  it("returns an empty array for validly-parsed JSON with malformed elements (empty object)", () => {
+    window.localStorage.setItem("cuurio:selection", "[{}]");
+    expect(readSelection()).toEqual([]);
+  });
 });
