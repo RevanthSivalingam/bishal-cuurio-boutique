@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -33,11 +34,19 @@ export default function LoginPage() {
   return (
     <main className="flex-1 flex items-center justify-center p-4">
       <Card className="w-full max-w-sm p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <h1 className="sr-only">
             {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <Image
+            src="/branding/logo-full.png"
+            alt=""
+            width={220}
+            height={256}
+            className="h-32 w-auto object-contain mb-3"
+            priority
+          />
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Sign in to manage your shop.
           </p>
         </div>
