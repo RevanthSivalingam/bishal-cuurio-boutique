@@ -25,8 +25,8 @@
   --paper-edge: #e7e2d8;
   --ink: #1a1a17;
   --mist: #6b6b63;
-  --brass: #a6783f;
-  --brass-deep: #7a5a2e;
+  --brass: #C9A24C;
+  --brass-deep: #611E20;
 }
 
 .dark,
@@ -48,8 +48,8 @@
   --paper-edge: #2a2720;
   --ink: #f5f1e8;
   --mist: #a8a296;
-  --brass: #c79a5a;
-  --brass-deep: #c79a5a;
+  --brass: #C9A24C;
+  --brass-deep: #D16164;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -71,8 +71,8 @@
     --paper-edge: #2a2720;
     --ink: #f5f1e8;
     --mist: #a8a296;
-    --brass: #c79a5a;
-    --brass-deep: #c79a5a;
+    --brass: #C9A24C;
+    --brass-deep: #D16164;
   }
 }
 
