@@ -17,6 +17,9 @@ const startOfMonthISO = () => {
 };
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
+const EMPTY_SALES: Sale[] = [];
+const EMPTY_ITEMS: SaleItem[] = [];
+
 function bucketByDay(sales: Sale[], from: string, to: string): number[] {
   const start = new Date(`${from}T00:00:00`);
   const end = new Date(`${to}T00:00:00`);
@@ -55,8 +58,8 @@ export default function ReportsPage() {
     queryKey: ["reports", from, to],
     queryFn: () => fetchReport(from, to),
   });
-  const sales = data?.sales ?? [];
-  const items = data?.items ?? [];
+  const sales = data?.sales ?? EMPTY_SALES;
+  const items = data?.items ?? EMPTY_ITEMS;
   const lowStock = data?.lowStock ?? [];
   const loading = isLoading;
 
