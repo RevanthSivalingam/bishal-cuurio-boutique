@@ -59,7 +59,7 @@ export default async function ProductDetailPage({
   return (
     <>
       <TopNav />
-      <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-6 bg-paper text-ink">
+      <main className="flex-1 w-full max-w-3xl mx-auto px-4 pt-6 pb-24 bg-paper text-ink">
         <nav aria-label="Breadcrumb" className="mb-6">
           <ol className="flex items-center gap-1 text-sm text-mist flex-wrap">
             <li>

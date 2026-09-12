@@ -23,7 +23,7 @@ export function SelectionBar() {
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-40 bg-ink text-paper px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
+    <div className="fixed bottom-0 inset-x-0 z-30 bg-ink text-paper px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
       {open && (
         <ul className="flex flex-col gap-1.5 mb-3 max-h-40 overflow-y-auto">
           {items.map((item) => (
@@ -45,6 +45,7 @@ export function SelectionBar() {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
           className="text-sm font-medium underline underline-offset-2"
         >
           {items.length} selected
