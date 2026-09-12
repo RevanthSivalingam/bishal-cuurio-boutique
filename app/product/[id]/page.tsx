@@ -6,6 +6,7 @@ import { TopNav } from "@/components/top-nav";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { ShareButtons } from "@/components/share-buttons";
 import { EnquireButton } from "@/components/enquire-button";
+import { SelectToggle } from "@/components/select-toggle";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatINR } from "@/lib/money";
 import { availability } from "@/lib/availability";
@@ -123,7 +124,13 @@ export default async function ProductDetailPage({
               {priceLabel}
             </p>
             <div className="flex flex-col gap-3 pt-1">
-              <EnquireButton name={p.name} price={priceLabel} available={inStock} />
+              <div className="flex items-center gap-3">
+                <EnquireButton name={p.name} price={priceLabel} available={inStock} />
+                <SelectToggle
+                  item={{ id: p.id, name: p.name, price: p.selling_price }}
+                  size="lg"
+                />
+              </div>
               <ShareButtons
                 title={p.name}
                 text={`${p.name} · ${priceLabel}`}
