@@ -72,7 +72,7 @@ npm run dev -- -H 0.0.0.0
 
 ```text
 app/
-  layout.tsx                 shell: theme script, query provider, selection provider
+  layout.tsx                 shell: theme script, query provider
   page.tsx                   public catalog (storefront home)
   product/[id]/page.tsx      public product detail
   login/page.tsx             email+password sign-in

@@ -31,7 +31,11 @@ async function fetchLog(): Promise<LogEntry[]> {
 
 export default function StockPage() {
   const queryClient = useQueryClient();
-  const { data: log = [], isLoading: loading } = useQuery({
+  const {
+    data: log = [],
+    isLoading: loading,
+    error: logError,
+  } = useQuery({
     queryKey: ["stock-adjustments"],
     queryFn: fetchLog,
   });
@@ -77,7 +81,9 @@ export default function StockPage() {
     );
   };
 
-  const err = saveMutation.error instanceof Error ? saveMutation.error.message : null;
+  const err =
+    (saveMutation.error instanceof Error ? saveMutation.error.message : null) ??
+    (logError instanceof Error ? logError.message : null);
 
   return (
     <div className="flex flex-col gap-4">

@@ -69,6 +69,7 @@ export function InventoryGrid({ products, categories }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
+          aria-label="Search products"
         />
       </div>
 

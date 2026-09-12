@@ -53,7 +53,7 @@ export function CatalogGrid({ products, categories }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-mist pointer-events-none" />
         <Input
           placeholder="Search products…"
           value={search}

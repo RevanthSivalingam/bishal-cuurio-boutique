@@ -41,7 +41,6 @@ async function fetchReport(from: string, to: string) {
     fetchReportData(supabase, fromIso, toIso),
     supabase.from("products").select("*").order("stock", { ascending: true }),
   ]);
-  if (low.error) throw new Error(low.error.message);
   const prods = (low.data ?? []) as Product[];
   return {
     sales: report.sales,
@@ -54,7 +53,7 @@ export default function ReportsPage() {
   const [from, setFrom] = useState(startOfMonthISO());
   const [to, setTo] = useState(todayISO());
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["reports", from, to],
     queryFn: () => fetchReport(from, to),
   });
@@ -90,6 +89,12 @@ export default function ReportsPage() {
         <span className="text-muted-foreground text-sm">to</span>
         <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-auto" />
       </div>
+
+      {error && (
+        <p className="text-red-600 dark:text-red-400 text-sm">
+          {error instanceof Error ? error.message : "Load failed"}
+        </p>
+      )}
 
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {loading ? (

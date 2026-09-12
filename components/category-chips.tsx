@@ -1,6 +1,6 @@
 "use client";
 
-type Category = { id: string; name: string };
+import type { Category } from "@/lib/schemas";
 
 type Props = {
   categories: Category[];
