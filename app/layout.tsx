@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Calistoga } from "next/font/google";
 import "./globals.css";
+import { AppQueryProvider } from "@/components/query-provider";
+import { SelectionProvider } from "@/components/selection-provider";
+import { SelectionBar } from "@/components/selection-bar";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -19,7 +22,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#fafaf9" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
@@ -38,7 +40,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full flex flex-col">
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        {children}
+        <AppQueryProvider>
+          <SelectionProvider>
+            {children}
+            <SelectionBar />
+          </SelectionProvider>
+        </AppQueryProvider>
       </body>
     </html>
   );

@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Search, Package, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ProductCard } from "@/components/product-card";
+import { CategoryChips } from "@/components/category-chips";
 import type { Category, Product } from "@/lib/schemas";
 
 type Props = {
@@ -22,6 +24,15 @@ export function InventoryGrid({ products, categories }: Props) {
     [categories]
   );
 
+  const countsByCategory = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of products) {
+      if (!p.category_id) continue;
+      m.set(p.category_id, (m.get(p.category_id) ?? 0) + 1);
+    }
+    return m;
+  }, [products]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return products.filter((p) => {
@@ -33,56 +44,46 @@ export function InventoryGrid({ products, categories }: Props) {
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center text-center py-16 gap-4">
-        <div className="size-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-          <Package className="size-8 text-zinc-400 dark:text-zinc-500" />
-        </div>
-        <div>
-          <h2 className="font-medium text-lg">No products yet</h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Add your first product to start tracking stock and margins.
-          </p>
-        </div>
-        <Link href="/inventory/new">
-          <Button size="lg">
-            <Plus className="size-4" />
-            Add your first product
-          </Button>
-        </Link>
-      </div>
+      <EmptyState
+        icon={Package}
+        title="No products yet"
+        description="Add your first product to start tracking stock and margins."
+        action={
+          <Link href="/inventory/new">
+            <Button size="lg">
+              <Plus className="size-4" />
+              Add your first product
+            </Button>
+          </Link>
+        }
+      />
     );
   }
 
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 dark:text-zinc-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <Input
           placeholder="Search products…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
+          aria-label="Search products"
         />
       </div>
 
-      <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 scrollbar-none">
-        <CategoryChip
-          label="All"
-          active={activeCategory === null}
-          onClick={() => setActiveCategory(null)}
-        />
-        {categories.map((c) => (
-          <CategoryChip
-            key={c.id}
-            label={c.name}
-            active={activeCategory === c.id}
-            onClick={() => setActiveCategory(c.id)}
-          />
-        ))}
-      </div>
+      <CategoryChips
+        categories={categories}
+        activeCategory={activeCategory}
+        onSelect={setActiveCategory}
+        counts={countsByCategory}
+        totalCount={products.length}
+        variant="admin"
+      />
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-10">
+        <p className="text-sm text-muted-foreground text-center py-10">
           No products match your filters.
         </p>
       ) : (
@@ -97,30 +98,5 @@ export function InventoryGrid({ products, categories }: Props) {
         </div>
       )}
     </div>
-  );
-}
-
-function CategoryChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        "shrink-0 px-3 h-9 rounded-full text-sm font-medium transition-colors " +
-        (active
-          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700")
-      }
-    >
-      {label}
-    </button>
   );
 }

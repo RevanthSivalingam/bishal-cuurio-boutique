@@ -21,7 +21,7 @@ export default async function CatalogPage() {
   return (
     <>
       <TopNav />
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-6 bg-paper text-ink">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 pt-6 pb-24 bg-paper text-ink">
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-2 border-b border-paper-edge pb-5">
             <p className="specimen-label text-brass">Curios &amp; collectibles</p>

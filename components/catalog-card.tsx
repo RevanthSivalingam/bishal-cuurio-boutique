@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { InitialsAvatar } from "@/components/initials-avatar";
+import { SelectToggle } from "@/components/select-toggle";
 import { formatINR } from "@/lib/money";
 import { availability } from "@/lib/availability";
 import type { Product, Category } from "@/lib/schemas";
@@ -36,6 +37,9 @@ export function CatalogCard({ product, category }: Props) {
               {av.label}
             </span>
           )}
+          <div className="absolute top-2 right-2">
+            <SelectToggle item={{ id: product.id, name: product.name, price: product.selling_price }} />
+          </div>
         </div>
         <div className="p-3 flex flex-col gap-1.5">
           {category && (

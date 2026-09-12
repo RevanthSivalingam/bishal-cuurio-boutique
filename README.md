@@ -1,9 +1,8 @@
-# Return-Gift Shop — Inventory v1
+# Bishal Cuurio Boutique
 
-Mobile-friendly inventory manager for a small return-gift shop. Built to run **100% free** on Vercel + Supabase.
+Mobile-first shop management app for a small return-gift and decor-rental boutique. Built to run **100% free** on Vercel + Supabase.
 
-**v1 scope:** inventory CRUD with auto-calculated margins and image uploads.
-Phase 2 (later): POS billing, GST PDF invoice, WhatsApp share, dashboard.
+**Two audiences, one app:** a public catalog (`/`, `/product/[id]`) customers browse and select items from to enquire via WhatsApp — no accounts, no online checkout (planned for a future phase) — and a signed-in admin suite for inventory, POS billing with PDF invoices, end-of-day stock adjustment, and sales/profit reporting.
 
 ## Stack
 
@@ -73,26 +72,39 @@ npm run dev -- -H 0.0.0.0
 
 ```text
 app/
-  layout.tsx                 shell, mobile top bar
-  page.tsx                   redirects to /inventory
+  layout.tsx                 shell: theme script, query provider
+  page.tsx                   public catalog (storefront home)
+  product/[id]/page.tsx      public product detail
   login/page.tsx             email+password sign-in
-  inventory/
-    layout.tsx               inventory shell (top nav)
-    page.tsx                 grid of products, search, category filter
-    inventory-grid.tsx       client grid w/ filters
-    new/page.tsx             add product
-    [id]/edit/page.tsx       edit / delete product
+  inventory/                 admin: product CRUD
+    layout.tsx, page.tsx, inventory-grid.tsx, new/page.tsx, [id]/edit/page.tsx
+  categories/                admin: category CRUD
+  sales/                     admin: POS billing
+    page.tsx                 bill history, filters, pagination
+    new/page.tsx             checkout / cart
+    [id]/page.tsx            bill view, PDF, void, duplicate
+  stock/                     admin: end-of-day stock adjustment + audit log
+  reports/                   admin: sales/profit dashboard
 components/
-  ui/*                       button, input, label, card, select, badge
-  top-nav.tsx                sticky header + sign-out
-  product-card.tsx           tile w/ image, stock badge, margin %
-  product-form.tsx           shared add/edit form + live margin preview
-  image-upload.tsx           tap-to-upload image (camera-friendly)
+  ui/*                       button, input, label, card, select, badge, skeleton, empty-state
+  admin-layout.tsx           shared admin page shell
+  top-nav.tsx                sticky header + mobile drawer nav
+  category-chips.tsx         shared category filter chips (storefront + admin)
+  catalog-grid.tsx / catalog-card.tsx     public catalog grid + card
+  product-card.tsx / product-form.tsx    admin inventory grid card + form
+  product-picker.tsx         search-to-add combobox (sales/new, stock)
+  enquire-button.tsx         single-item WhatsApp enquiry
+  share-buttons.tsx          native share
+  bill-pdf.ts                jsPDF bill generation
+  sparkline.tsx              tiny inline chart for reports
+  theme-toggle.tsx           light/dark toggle
+  query-provider.tsx         TanStack Query client provider
 lib/
-  supabase/client.ts         browser Supabase client
-  supabase/server.ts         server Supabase client (cookies)
+  supabase/client.ts, server.ts   Supabase clients
+  sales.ts                   sale/bill/stock RPC wrappers
+  availability.ts            stock-status labels ("One of a kind", "Only N left")
   money.ts                   INR formatting + margin calc
-  schemas.ts                 zod schemas for Product
+  schemas.ts                 zod schemas
   utils.ts                   cn() helper
 proxy.ts                     auth redirect (Next 16 renamed from middleware)
 schema.sql                   paste into Supabase SQL editor

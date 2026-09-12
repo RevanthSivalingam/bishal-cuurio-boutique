@@ -10,21 +10,36 @@ type Options = {
 
 const FONT_URL = "/fonts/NotoSans-Regular.ttf";
 const FONT_NAME = "NotoSans";
-let cachedFontBase64: string | null = null;
+const LOGO_URL = "/branding/logo-pdf.png";
+const LOGO_ASPECT = 300 / 350; // width / height of public/branding/logo-pdf.png
 
-async function loadFontBase64(): Promise<string> {
-  if (cachedFontBase64) return cachedFontBase64;
-  const res = await fetch(FONT_URL);
-  if (!res.ok) throw new Error(`Failed to load PDF font: ${res.status}`);
-  const buf = await res.arrayBuffer();
+let cachedFontBase64: string | null = null;
+let cachedLogoBase64: string | null = null;
+
+export function bufferToBase64(buf: ArrayBuffer): string {
   const bytes = new Uint8Array(buf);
   let binary = "";
   const chunk = 0x8000;
   for (let i = 0; i < bytes.length; i += chunk) {
     binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
   }
-  cachedFontBase64 = btoa(binary);
+  return btoa(binary);
+}
+
+async function loadFontBase64(): Promise<string> {
+  if (cachedFontBase64) return cachedFontBase64;
+  const res = await fetch(FONT_URL);
+  if (!res.ok) throw new Error(`Failed to load PDF font: ${res.status}`);
+  cachedFontBase64 = bufferToBase64(await res.arrayBuffer());
   return cachedFontBase64;
+}
+
+export async function loadLogoBase64(): Promise<string> {
+  if (cachedLogoBase64) return cachedLogoBase64;
+  const res = await fetch(LOGO_URL);
+  if (!res.ok) throw new Error(`Failed to load PDF logo: ${res.status}`);
+  cachedLogoBase64 = bufferToBase64(await res.arrayBuffer());
+  return cachedLogoBase64;
 }
 
 export async function generateBillPdf(
@@ -32,18 +47,42 @@ export async function generateBillPdf(
   items: SaleItem[],
   opts: Options
 ) {
-  const fontBase64 = await loadFontBase64();
+  const [fontBase64, logoBase64] = await Promise.all([
+    loadFontBase64(),
+    // A missing/broken logo must never block generating a bill — a core,
+    // revenue-critical operation — so this failure is swallowed, not thrown.
+    // It's still logged, so a broken logo doesn't silently ship un-branded
+    // bills forever with no trace.
+    loadLogoBase64().catch((e) => {
+      console.warn("PDF logo failed to load, generating bill without it:", e);
+      return null;
+    }),
+  ]);
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   doc.addFileToVFS(`${FONT_NAME}.ttf`, fontBase64);
   doc.addFont(`${FONT_NAME}.ttf`, FONT_NAME, "normal");
 
-  let y = 15;
   const left = 15;
   const right = 195;
+  let y = 15;
+
+  if (logoBase64) {
+    const logoWidth = 20;
+    const logoHeight = logoWidth / LOGO_ASPECT;
+    doc.addImage(
+      `data:image/png;base64,${logoBase64}`,
+      "PNG",
+      105 - logoWidth / 2,
+      8,
+      logoWidth,
+      logoHeight
+    );
+    y = 8 + logoHeight + 6;
+  }
 
   doc.setFont(FONT_NAME, "normal");
   doc.setFontSize(18);
-  doc.text(opts.shopName, left, y);
+  doc.text(opts.shopName, 105, y, { align: "center" });
   y += 6;
   if (opts.gstNumber) {
     doc.setFontSize(9);
@@ -98,6 +137,11 @@ export async function generateBillPdf(
     doc.text(formatINR(item.unit_sell_price), 150, y, { align: "right" });
     doc.text(formatINR(item.line_total), right, y, { align: "right" });
     y += 6;
+  }
+
+  if (y > 250) {
+    doc.addPage();
+    y = 15;
   }
 
   doc.line(left, y, right, y);
