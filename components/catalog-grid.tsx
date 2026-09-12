@@ -5,6 +5,7 @@ import { Search, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { CatalogCard } from "@/components/catalog-card";
+import { CategoryChips } from "@/components/category-chips";
 import type { Category, Product } from "@/lib/schemas";
 
 type Props = {
@@ -62,25 +63,14 @@ export function CatalogGrid({ products, categories }: Props) {
         />
       </div>
 
-      <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 scrollbar-none">
-        <Chip
-          label={`All · ${products.length}`}
-          active={activeCategory === null}
-          onClick={() => setActiveCategory(null)}
-        />
-        {categories.map((c) => {
-          const count = countsByCategory.get(c.id) ?? 0;
-          if (count === 0) return null;
-          return (
-            <Chip
-              key={c.id}
-              label={`${c.name} · ${count}`}
-              active={activeCategory === c.id}
-              onClick={() => setActiveCategory(c.id)}
-            />
-          );
-        })}
-      </div>
+      <CategoryChips
+        categories={categories}
+        activeCategory={activeCategory}
+        onSelect={setActiveCategory}
+        counts={countsByCategory}
+        totalCount={products.length}
+        variant="storefront"
+      />
 
       {filtered.length === 0 ? (
         <p className="text-sm text-mist text-center py-8">
@@ -98,29 +88,5 @@ export function CatalogGrid({ products, categories }: Props) {
         </div>
       )}
     </div>
-  );
-}
-
-function Chip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors tabular-nums ${
-        active
-          ? "bg-brass-deep text-white border-brass-deep dark:text-[#14130f]"
-          : "bg-paper border-paper-edge text-mist hover:text-ink hover:border-brass"
-      }`}
-    >
-      {label}
-    </button>
   );
 }
