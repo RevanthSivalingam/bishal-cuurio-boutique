@@ -51,7 +51,12 @@ export async function generateBillPdf(
     loadFontBase64(),
     // A missing/broken logo must never block generating a bill — a core,
     // revenue-critical operation — so this failure is swallowed, not thrown.
-    loadLogoBase64().catch(() => null),
+    // It's still logged, so a broken logo doesn't silently ship un-branded
+    // bills forever with no trace.
+    loadLogoBase64().catch((e) => {
+      console.warn("PDF logo failed to load, generating bill without it:", e);
+      return null;
+    }),
   ]);
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   doc.addFileToVFS(`${FONT_NAME}.ttf`, fontBase64);
@@ -132,6 +137,11 @@ export async function generateBillPdf(
     doc.text(formatINR(item.unit_sell_price), 150, y, { align: "right" });
     doc.text(formatINR(item.line_total), right, y, { align: "right" });
     y += 6;
+  }
+
+  if (y > 250) {
+    doc.addPage();
+    y = 15;
   }
 
   doc.line(left, y, right, y);

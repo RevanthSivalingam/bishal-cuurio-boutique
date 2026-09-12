@@ -42,7 +42,7 @@ export default function LoginPage() {
             src="/branding/logo-full.png"
             alt=""
             width={220}
-            height={256}
+            height={257}
             className="h-32 w-auto object-contain mb-3"
             preload
           />
