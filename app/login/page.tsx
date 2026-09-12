@@ -44,7 +44,7 @@ export default function LoginPage() {
             width={220}
             height={256}
             className="h-32 w-auto object-contain mb-3"
-            priority
+            preload
           />
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Sign in to manage your shop.
