@@ -27,9 +27,15 @@ describe("SelectionBar", () => {
     vi.mocked(usePathname).mockReturnValue("/");
   });
 
-  it("renders nothing when the selection is empty", () => {
-    const { container } = renderBar();
-    expect(container).toBeEmptyDOMElement();
+  it("stays mounted but inert/hidden when the selection is empty", () => {
+    // Deliberately NOT unmounted (no `return null`) — see the comment in
+    // selection-bar.tsx on why: iOS Safari can mis-anchor a `fixed` element
+    // inserted into the DOM mid-scroll, so the bar stays present and is
+    // hidden visually/interactively instead.
+    renderBar();
+    const bar = screen.getByText("0 selected").closest("div[inert]");
+    expect(bar).not.toBeNull();
+    expect(bar).toHaveClass("translate-y-full", "pointer-events-none");
   });
 
   it("renders nothing on a non-storefront pathname even with items selected", () => {
@@ -53,13 +59,15 @@ describe("SelectionBar", () => {
     }
   );
 
-  it("clicking Clear all empties the selection", async () => {
+  it("clicking Clear all empties the selection and hides the bar again", async () => {
     writeSelection([vase, lamp]);
-    const { container } = renderBar();
+    renderBar();
 
     await userEvent.click(screen.getByRole("button", { name: "Clear all" }));
 
-    expect(container).toBeEmptyDOMElement();
+    const bar = screen.getByText("0 selected").closest("div[inert]");
+    expect(bar).not.toBeNull();
+    expect(bar).toHaveClass("translate-y-full", "pointer-events-none");
   });
 
   it("removing one item from the expanded list updates the count", async () => {

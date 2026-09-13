@@ -14,7 +14,9 @@ export function SelectionBar() {
   const [open, setOpen] = useState(false);
 
   const isStorefront = pathname === "/" || pathname.startsWith("/product/");
-  if (!isStorefront || items.length === 0) return null;
+  if (!isStorefront) return null;
+
+  const hasItems = items.length > 0;
 
   const share = () => {
     const message = buildWhatsAppMessage(items, window.location.origin);
@@ -23,7 +25,17 @@ export function SelectionBar() {
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-30 bg-ink text-paper px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3">
+    // Stays mounted even when empty, hidden via transform instead of unmounting.
+    // iOS Safari can mis-anchor a `position: fixed` element to the wrong reference
+    // frame when it's inserted into the DOM while the page is already scrolled —
+    // which is exactly what happens the moment the first item is added while
+    // browsing further down the catalog. Keeping it always-present sidesteps that.
+    <div
+      className={`fixed bottom-0 inset-x-0 z-30 bg-ink text-paper px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 transition-transform duration-200 ${
+        hasItems ? "translate-y-0" : "translate-y-full pointer-events-none"
+      }`}
+      inert={!hasItems}
+    >
       {open && (
         <ul className="flex flex-col gap-1.5 mb-3 max-h-40 overflow-y-auto">
           {items.map((item) => (
