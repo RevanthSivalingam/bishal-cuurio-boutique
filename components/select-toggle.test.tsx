@@ -3,19 +3,21 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SelectToggle } from "./select-toggle";
 import { useSelection } from "@/components/selection-provider";
-import type { SelectedItem } from "@/lib/selection";
+import type { NewSelectedItem } from "@/lib/selection";
 
 vi.mock("@/components/selection-provider", () => ({
   useSelection: vi.fn(),
 }));
 
-const item: SelectedItem = { id: "1", name: "Brass Vase", price: 450 };
+const item: NewSelectedItem = { id: "1", name: "Brass Vase", price: 450 };
 
 function mockSelection(selected: boolean) {
   const mock = {
-    items: selected ? [item] : [],
-    add: vi.fn<(item: SelectedItem) => void>(),
+    items: selected ? [{ ...item, quantity: 1 }] : [],
+    add: vi.fn<(item: NewSelectedItem) => void>(),
     remove: vi.fn<(id: string) => void>(),
+    increment: vi.fn<(id: string) => void>(),
+    decrement: vi.fn<(id: string) => void>(),
     clear: vi.fn<() => void>(),
     has: vi.fn<(id: string) => boolean>(() => selected),
   };

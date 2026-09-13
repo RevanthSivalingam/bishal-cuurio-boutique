@@ -2,10 +2,10 @@
 
 import { Check, Plus } from "lucide-react";
 import { useSelection } from "@/components/selection-provider";
-import type { SelectedItem } from "@/lib/selection";
+import type { NewSelectedItem } from "@/lib/selection";
 
 type Props = {
-  item: SelectedItem;
+  item: NewSelectedItem;
   size?: "sm" | "lg";
 };
 

@@ -10,8 +10,8 @@ vi.mock("next/navigation", () => ({
   usePathname: vi.fn(),
 }));
 
-const vase: SelectedItem = { id: "1", name: "Brass Vase", price: 450 };
-const lamp: SelectedItem = { id: "2", name: "Ceramic Lamp", price: 1200 };
+const vase: SelectedItem = { id: "1", name: "Brass Vase", price: 450, quantity: 1 };
+const lamp: SelectedItem = { id: "2", name: "Ceramic Lamp", price: 1200, quantity: 1 };
 
 function renderBar() {
   return render(
@@ -72,6 +72,30 @@ describe("SelectionBar", () => {
     expect(screen.getByText("1 selected")).toBeInTheDocument();
     expect(screen.queryByText(vase.name)).not.toBeInTheDocument();
     expect(screen.getByText(lamp.name)).toBeInTheDocument();
+  });
+
+  it("increasing quantity via + updates the displayed quantity, not the selected count", async () => {
+    writeSelection([vase]);
+    renderBar();
+
+    await userEvent.click(screen.getByRole("button", { name: "1 selected" }));
+    await userEvent.click(screen.getByRole("button", { name: `Increase quantity of ${vase.name}` }));
+
+    expect(screen.getByText("2")).toBeInTheDocument();
+    // Distinct-item count is unchanged — quantity is not the same as item count.
+    expect(screen.getByText("1 selected")).toBeInTheDocument();
+  });
+
+  it("decreasing quantity floors at 1 — the minus button is disabled at quantity 1", async () => {
+    writeSelection([vase]);
+    renderBar();
+
+    await userEvent.click(screen.getByRole("button", { name: "1 selected" }));
+    const minus = screen.getByRole("button", { name: `Decrease quantity of ${vase.name}` });
+
+    expect(minus).toBeDisabled();
+    await userEvent.click(minus);
+    expect(screen.getByText(vase.name)).toBeInTheDocument(); // still present, not removed
   });
 });
 

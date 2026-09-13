@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle, Minus, Plus, X } from "lucide-react";
 import { useSelection } from "@/components/selection-provider";
 import { buildWhatsAppMessage } from "@/lib/selection";
 
@@ -10,7 +10,7 @@ const SHOP_WA = (process.env.NEXT_PUBLIC_SHOP_WHATSAPP ?? "").replace(/\D/g, "")
 
 export function SelectionBar() {
   const pathname = usePathname();
-  const { items, remove, clear } = useSelection();
+  const { items, remove, increment, decrement, clear } = useSelection();
   const [open, setOpen] = useState(false);
 
   const isStorefront = pathname === "/" || pathname.startsWith("/product/");
@@ -28,7 +28,29 @@ export function SelectionBar() {
         <ul className="flex flex-col gap-1.5 mb-3 max-h-40 overflow-y-auto">
           {items.map((item) => (
             <li key={item.id} className="flex items-center justify-between gap-2 text-sm">
-              <span className="truncate">{item.name}</span>
+              <span className="truncate flex-1">{item.name}</span>
+              <div className="flex items-center gap-0.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => decrement(item.id)}
+                  disabled={item.quantity <= 1}
+                  aria-label={`Decrease quantity of ${item.name}`}
+                  className="p-2.5 disabled:opacity-30 opacity-70 hover:opacity-100"
+                >
+                  <Minus className="size-3.5" />
+                </button>
+                <span className="w-5 text-center tabular-nums" aria-live="polite">
+                  {item.quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => increment(item.id)}
+                  aria-label={`Increase quantity of ${item.name}`}
+                  className="p-2.5 opacity-70 hover:opacity-100"
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => remove(item.id)}
