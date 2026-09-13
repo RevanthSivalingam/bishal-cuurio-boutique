@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { TopNav } from "@/components/top-nav";
 import { CatalogGrid } from "@/components/catalog-grid";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -26,15 +25,9 @@ export default async function CatalogPage() {
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-2 border-b border-paper-edge pb-5">
             <p className="specimen-label text-brass">Curios &amp; collectibles</p>
-            <h1 className="sr-only">{shopName}</h1>
-            <Image
-              src="/branding/logo-full.png"
-              alt=""
-              width={220}
-              height={257}
-              className="h-24 md:h-28 w-auto object-contain"
-              preload
-            />
+            <h1 className="text-3xl md:text-4xl font-[family-name:var(--font-display)] leading-tight text-ink">
+              {shopName}
+            </h1>
             <p className="text-sm text-mist max-w-prose">
               A rotating shelf of one-of-a-kind finds. Spot something you like,
               then message us to make it yours.

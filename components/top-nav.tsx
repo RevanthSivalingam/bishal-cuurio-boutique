@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import {
   LogOut,
@@ -94,6 +95,13 @@ export function TopNav() {
             href="/"
             className="flex items-center gap-2 font-semibold min-w-0"
           >
+            <Image
+              src="/branding/logo-full.png"
+              alt=""
+              width={27}
+              height={32}
+              className="h-8 w-auto object-contain shrink-0"
+            />
             <span className="truncate">
               {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
             </span>
@@ -129,7 +137,14 @@ export function TopNav() {
           >
             <X className="size-5" />
           </button>
-          <span className="font-semibold truncate">
+          <span className="flex items-center gap-2 font-semibold truncate">
+            <Image
+              src="/branding/logo-full.png"
+              alt=""
+              width={24}
+              height={28}
+              className="h-7 w-auto object-contain shrink-0"
+            />
             {process.env.NEXT_PUBLIC_SHOP_NAME || "Boutique"}
           </span>
         </div>
